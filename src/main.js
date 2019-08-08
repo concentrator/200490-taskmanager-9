@@ -281,8 +281,9 @@ const taskParams = {
 const renderTasks = (data, wrapper, count) => {
   count = (data.length < count) ? data.length : count;
   for (let i = 0; i < count; i++) {
-    const params = Object.assign({}, taskParams); // Object shallow copy
-    Object.assign(params, data[i]); // Merge defaults and task data
+    // const params = Object.assign({}, taskParams); // Object shallow copy
+    // Object.assign(params, data[i]);
+    const params = {...taskParams, ...data[i]}; // Merge defaults and task data
     wrapper.insertAdjacentHTML(`beforeend`, getTask(params));
   }
 };
