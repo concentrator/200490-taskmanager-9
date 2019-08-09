@@ -3,22 +3,6 @@ import {renderWrapper} from '../utils';
 
 const MENU_WRAPPER_CLASS = `control__btn-wrap`;
 
-const MENU_ITEMS = [
-  {
-    id: `new-task`,
-    label: `+ ADD NEW TASK`
-  },
-  {
-    id: `task`,
-    label: `TASKS`,
-    isChecked: true
-  },
-  {
-    id: `statistic`,
-    label: `STATISTICS`
-  },
-];
-
 const menuWrapper = renderWrapper(`section`, MENU_WRAPPER_CLASS);
 
 const menuParams = {
@@ -39,7 +23,7 @@ const createMenuItemTemplate = ({id, label, isChecked}) => {
     >${label}</label>`;
 };
 
-export const createSiteMenu = () => {
-  renderMuliply(menuWrapper, `beforeend`, createMenuItemTemplate, menuParams, MENU_ITEMS);
+export const createSiteMenu = (params) => {
+  renderMuliply(menuWrapper, `beforeend`, createMenuItemTemplate, menuParams, params);
   return menuWrapper;
 };

@@ -3,38 +3,6 @@ import {renderWrapper} from '../utils';
 
 const FILTER_WRAPPER_CLASS = `main__filter filter container`;
 
-const FILTER_ITEMS = [
-  {
-    id: `all`,
-    count: 13,
-    isChecked: true
-  },
-  {
-    id: `overdue`,
-    isDisabled: true
-  },
-  {
-    id: `today`,
-    isDisabled: true
-  },
-  {
-    id: `favorites`,
-    count: 1,
-  },
-  {
-    id: `repeating`,
-    count: 1,
-  },
-  {
-    id: `tags`,
-    count: 1,
-  },
-  {
-    id: `archive`,
-    count: 115,
-  }
-];
-
 const filterWrapper = renderWrapper(`section`, FILTER_WRAPPER_CLASS);
 
 const filterParams = {
@@ -59,7 +27,7 @@ const createFilterTemplate = ({id, count, isChecked, isDisabled}) => {
   </label>`;
 };
 
-export const createFilter = () => {
-  renderMuliply(filterWrapper, `beforeend`, createFilterTemplate, filterParams, FILTER_ITEMS);
+export const createFilter = (params) => {
+  renderMuliply(filterWrapper, `beforeend`, createFilterTemplate, filterParams, params);
   return filterWrapper;
 };

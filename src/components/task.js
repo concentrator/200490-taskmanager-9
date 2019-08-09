@@ -1,54 +1,5 @@
 import {renderMuliply} from '../utils';
 
-const TASKS = [
-  {
-    text: `Example default task with default color.`,
-    date: `23 September`,
-    time: `11:15 PM`,
-    tags: [`todo`, `personal`, `important`]
-  },
-  {
-    color: `blue`,
-    text: `Example default task with custom color.`,
-    date: `23 September`,
-    time: `11:15 PM`,
-    tags: [`todo`, `personal`, `important`]
-  },
-  {
-    color: `yellow`,
-    text: `Example default task with custom color and without date.`,
-    tags: [`todo`, `personal`, `important`]
-  },
-  {
-    color: `green`,
-    text: `Example default task with custom color and without hashtags.`,
-    date: `23 September`,
-    time: `11:15 PM`,
-  },
-  {
-    text: `Example default task without date and hashtags.`,
-  },
-  {
-    color: `pink`,
-    text: `It is example of repeating task. It marks by wave.`,
-    date: `23 September`,
-    time: `11:15 PM`,
-    tags: [`todo`, `personal`, `important`],
-    repeating: true
-  },
-  {
-    text: `This is card with missing deadline.`,
-    deadline: true
-  },
-  {
-    text: `This is card with missing deadline. Deadline always marked by red line.`,
-    date: `23 September`,
-    time: `11:15 PM`,
-    tags: [`todo`, `personal`, `important`],
-    deadline: true
-  },
-];
-
 const createTaskTagTemplate = (name) => {
   return `
   <span class="card__hashtag-inner">
@@ -129,9 +80,8 @@ const createTaskTemplate = ({color, text, date, time, tags, repeating, deadline}
   </article>`;
 };
 
-export const renderTasksList = (count) => {
-  count = (TASKS.length < count) ? TASKS.length : count;
-  const limitedTasks = TASKS.slice(0, count);
+export const renderTasksList = (tasks, count) => {
+  let tasksToRender = (count && count < tasks.length) ? tasks.slice(0, count) : tasks;
   const tasksWrapper = document.querySelector(`.board__tasks`);
-  renderMuliply(tasksWrapper, `beforeend`, createTaskTemplate, taskParams, limitedTasks);
+  renderMuliply(tasksWrapper, `beforeend`, createTaskTemplate, taskParams, tasksToRender);
 };
