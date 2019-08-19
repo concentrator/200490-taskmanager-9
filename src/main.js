@@ -1,21 +1,21 @@
 import {render} from './utils';
 import {createSiteMenu} from './components/site-menu';
 import {createSearch} from './components/search';
-import {createFilter} from './components/filter';
+import {renderFilter} from './components/filter';
 import {createSort} from './components/sort';
 import {createBoardTemplate} from './components/board';
-import {createTaskEditTemplate} from './components/task-edit';
-import {renderTasksList} from './components/task';
+import {renderTasks} from './components/task-list';
 import {createMoreButtonTemplate} from './components/more-button';
 import data from './components/data';
 
+const TASKS_TO_LOAD = 8;
 
 const siteMain = document.querySelector(`.main`);
 const siteControl = siteMain.querySelector(`.main__control`);
 
 const siteMenu = createSiteMenu(data.menu);
 const search = createSearch(data.search);
-const filter = createFilter(data.filter);
+const filter = renderFilter(data.filter, data.taskList);
 const sort = createSort(data.sort);
 
 siteControl.appendChild(siteMenu);
@@ -29,7 +29,22 @@ const tasksWrapper = siteBoard.querySelector(`.board__tasks`);
 
 siteBoard.insertBefore(sort, tasksWrapper);
 
-render(tasksWrapper, `beforeend`, createTaskEditTemplate);
-renderTasksList(data.tasks, 3);
+renderTasks(tasksWrapper, data.taskList, TASKS_TO_LOAD, 0, true);
 
 render(siteBoard, `beforeend`, createMoreButtonTemplate, `load more`);
+
+const getTasksCount = () => tasksWrapper.childElementCount;
+
+const loadMoreButton = siteMain.querySelector(`.load-more`);
+
+loadMoreButton.addEventListener(`click`, (e) => {
+  e.preventDefault();
+  const tasksCount = getTasksCount();
+  const tasksLeft = data.taskList.length - tasksCount;
+
+  renderTasks(tasksWrapper, data.taskList, TASKS_TO_LOAD, tasksCount);
+
+  if (tasksLeft < TASKS_TO_LOAD) {
+    loadMoreButton.style.display = `none`;
+  }
+});

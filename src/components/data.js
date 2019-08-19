@@ -21,33 +21,28 @@ const searchItem = {
 
 const FilterItems = [
   {
-    id: `all`,
-    count: 13,
+    title: `all`,
     isChecked: true
   },
   {
-    id: `overdue`,
+    title: `overdue`,
     isDisabled: true
   },
   {
-    id: `today`,
+    title: `today`,
     isDisabled: true
   },
   {
-    id: `favorites`,
-    count: 1,
+    title: `favorites`,
   },
   {
-    id: `repeating`,
-    count: 1,
+    title: `repeating`,
   },
   {
-    id: `tags`,
-    count: 1,
+    title: `tags`,
   },
   {
-    id: `archive`,
-    count: 115,
+    title: `archive`,
   }
 ];
 
@@ -57,61 +52,64 @@ const SortItems = [
   {title: `DATE down`}
 ];
 
-const Tasks = [
-  {
-    text: `Example default task with default color.`,
-    date: `23 September`,
-    time: `11:15 PM`,
-    tags: [`todo`, `personal`, `important`]
+const getRandomBoolean = () => Boolean(Math.round(Math.random()));
+
+const shuffleArray = (a) => {
+  for (let i = a.length - 1; i > 0; i--) {
+    let j = Math.floor(Math.random() * (i + 1));
+    let x = a[i];
+    a[i] = a[j];
+    a[j] = x;
+  }
+  return a;
+};
+
+const getTask = () => ({
+  description: [
+    `Изучить теорию`,
+    `Сделать домашку`,
+    `Пройти интенсив на соточку`,
+  ][Math.floor(Math.random() * 3)],
+  // dueDate: Date.now() + 1 + Math.floor(Math.random() * 7) * 24 * 60 * 60 * 1000,
+  dueDate: new Date(),
+  repeatingDays: {
+    'Mo': false,
+    'Tu': false,
+    'We': getRandomBoolean(),
+    'Th': false,
+    'Fr': getRandomBoolean(),
+    'Sa': false,
+    'Su': false,
   },
-  {
-    color: `blue`,
-    text: `Example default task with custom color.`,
-    date: `23 September`,
-    time: `11:15 PM`,
-    tags: [`todo`, `personal`, `important`]
-  },
-  {
-    color: `yellow`,
-    text: `Example default task with custom color and without date.`,
-    tags: [`todo`, `personal`, `important`]
-  },
-  {
-    color: `green`,
-    text: `Example default task with custom color and without hashtags.`,
-    date: `23 September`,
-    time: `11:15 PM`,
-  },
-  {
-    text: `Example default task without date and hashtags.`,
-  },
-  {
-    color: `pink`,
-    text: `It is example of repeating task. It marks by wave.`,
-    date: `23 September`,
-    time: `11:15 PM`,
-    tags: [`todo`, `personal`, `important`],
-    repeating: true
-  },
-  {
-    text: `This is card with missing deadline.`,
-    deadline: true
-  },
-  {
-    text: `This is card with missing deadline. Deadline always marked by red line.`,
-    date: `23 September`,
-    time: `11:15 PM`,
-    tags: [`todo`, `personal`, `important`],
-    deadline: true
-  },
-];
+  tags: new Set(shuffleArray([
+    `homework`,
+    `theory`,
+    `practice`,
+    `intensive`,
+    `personal`,
+    `important`
+  ]).slice(0, Math.floor(Math.random() * 4))),
+  color: [
+    `black`,
+    `yellow`,
+    `blue`,
+    `green`,
+    `pink`,
+  ][Math.floor(Math.random() * 5)],
+  isFavorite: getRandomBoolean(),
+  isArchive: getRandomBoolean()
+});
+
+const getTaskList = (count) => Array.from(new Array(count), () => getTask());
+
+const taskList = getTaskList(33);
 
 const data = {
   menu: MenuItems,
   search: searchItem,
   filter: FilterItems,
   sort: SortItems,
-  tasks: Tasks
+  taskList
 };
 
 export default data;
