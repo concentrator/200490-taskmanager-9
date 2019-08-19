@@ -1,37 +1,18 @@
-import {renderMuliply} from '../utils';
-
-const createTaskTagTemplate = (name) => {
+const makeTaskTagsList = (tags) => {
   return `
-  <span class="card__hashtag-inner">
-    <span class="card__hashtag-name">
-      #${name}
-    </span>
-  </span>`;
+  <div class="card__hashtag-list">
+    ${Array.from(tags).map((tag) => `<span class="card__hashtag-inner">
+      <span class="card__hashtag-name">
+        #${tag}
+      </span>
+    </span>`).join(``)}
+  </div>`;
 };
 
-const createTaskTagsList = (tags) => {
-  let list = ``;
-  tags.forEach((name) => {
-    list += createTaskTagTemplate(name);
-    return list;
-  });
-  return `<div class="card__hashtag-list">${list}\n</div>`;
-};
-
-const taskParams = {
-  color: `black`,
-  text: ``,
-  date: ``,
-  time: ``,
-  tags: [],
-  repeating: false,
-  deadline: false
-};
-
-const createTaskTemplate = ({color, text, date, time, tags, repeating, deadline}) => {
-  const tagsList = createTaskTagsList(tags);
+export const makeTask = ({description, dueDate, repeatingDays, tags, color}) => {
+  const tagsList = makeTaskTagsList(tags);
   return `
-  <article class="card card--${color}${repeating ? ` card--repeat` : ``}${deadline ? ` card--deadline` : ``}">
+  <article class="card card--${color} ${Object.keys(repeatingDays).some((day) => repeatingDays[day]) ? `card--repeat` : ``}">
     <div class="card__form">
       <div class="card__inner">
         <div class="card__control">
@@ -56,7 +37,7 @@ const createTaskTemplate = ({color, text, date, time, tags, repeating, deadline}
         </div>
 
         <div class="card__textarea-wrap">
-          <p class="card__text">${text}</p>
+          <p class="card__text">${description}</p>
         </div>
 
         <div class="card__settings">
@@ -64,8 +45,8 @@ const createTaskTemplate = ({color, text, date, time, tags, repeating, deadline}
             <div class="card__dates">
               <div class="card__date-deadline">
                 <p class="card__input-deadline-wrap">
-                  <span class="card__date">${date}</span>
-                  <span class="card__time">${time}</span>
+                  <span class="card__date">${new Date(dueDate).toDateString()}</span>
+                  <span class="card__time"></span>
                 </p>
               </div>
             </div>
@@ -77,11 +58,5 @@ const createTaskTemplate = ({color, text, date, time, tags, repeating, deadline}
         </div>
       </div>
     </div>
-  </article>`;
-};
-
-export const renderTasksList = (tasks, count) => {
-  let tasksToRender = (count && count < tasks.length) ? tasks.slice(0, count) : tasks;
-  const tasksWrapper = document.querySelector(`.board__tasks`);
-  renderMuliply(tasksWrapper, `beforeend`, createTaskTemplate, taskParams, tasksToRender);
+  </article>`.trim();
 };
