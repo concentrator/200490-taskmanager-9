@@ -1,20 +1,26 @@
-import {renderMuliply} from '../utils';
-import {renderWrapper} from '../utils';
+import {createElement} from '../utils';
 
-const SORT_WRAPPER_CLASS = `board__filter-list`;
+class Sort {
+  constructor(items) {
+    this._items = items;
+    this._element = null;
+  }
 
-const sortWrapper = renderWrapper(`div`, SORT_WRAPPER_CLASS);
+  getElement() {
+    if (!this._element) {
+      this._element = createElement(this.getTemplate());
+    }
+    return this._element;
+  }
 
-const sortParams = {
-  title: ``,
-  url: `#`,
-};
+  getTemplate() {
+    return `
+    <div class="board__filter-list">
+    ${this._items.map((item) => `
+      <a href="${item.url ? item.url : `#`}" class="board__filter">SORT BY ${item.title}</a>`)
+      .join(``)}
+    </div>`;
+  }
+}
 
-const createSortItemTemplate = ({title, url}) => {
-  return `<a href="${url}" class="board__filter">SORT BY ${title}</a> `;
-};
-
-export const createSort = (params) => {
-  renderMuliply(sortWrapper, `beforeend`, createSortItemTemplate, sortParams, params);
-  return sortWrapper;
-};
+export default Sort;

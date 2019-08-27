@@ -104,8 +104,6 @@ const getTaskList = (count) => Array.from(new Array(count), () => getTask());
 
 const taskList = getTaskList(33);
 
-console.log(taskList[0]);
-
 const data = {
   menu: MenuItems,
   search: searchItem,

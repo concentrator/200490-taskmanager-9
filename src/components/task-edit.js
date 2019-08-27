@@ -17,9 +17,13 @@ class TaskEdit {
     return this._element;
   }
 
+  removeElement() {
+    this._element = null;
+  }
+
   getTemplate() {
     return `
-    <article class="card card--edit card--${this._color} ${Object.keys(this._repeatingDays).some((day) => this._repeatingDays[day]) ? `card--repeat` : ``}">
+    <article class="card card--edit card--${this._color} ${Object.values(this._repeatingDays).some((day) => day === true) ? `card--repeat` : ``}">
       <form class="card__form" method="get">
         <div class="card__inner">
           <div class="card__control">
@@ -70,7 +74,7 @@ class TaskEdit {
                 </fieldset>
 
                 <button class="card__repeat-toggle" type="button">
-                  repeat:<span class="card__repeat-status">${Object.keys(this._repeatingDays).some((day) => this._repeatingDays[day]) ? `yes` : `no`}</span>
+                  repeat:<span class="card__repeat-status">${Object.values(this._repeatingDays).some((day) => day === true) ? `yes` : `no`}</span>
                 </button>
 
                 <fieldset class="card__repeat-days">
@@ -266,3 +270,5 @@ class TaskEdit {
     </article>`.trim();
   }
 }
+
+export default TaskEdit;
