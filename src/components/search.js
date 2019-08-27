@@ -1,22 +1,31 @@
-import {render} from '../utils';
-import {renderWrapper} from '../utils';
+import {createElement} from '../utils';
 
-const SEARCH_WRAPPER_CLASS = `main__search search container`;
+class Search {
+  constructor({placeholder, label}) {
+    this._placeholder = placeholder;
+    this._label = label;
+    this._element = null;
+  }
 
-const searchWrapper = renderWrapper(`section`, SEARCH_WRAPPER_CLASS);
+  getElement() {
+    if (!this._element) {
+      this._element = createElement(this.getTemplate());
+    }
+    return this._element;
+  }
 
-const createSearchTemplate = ({placeholder, label}) => {
-  return `
-  <input
-    type="text"
-    id="search__input"
-    class="search__input"
-    placeholder="${placeholder}"
-    />
-  <label class="visually-hidden" for="search__input">${label}</label>`;
-};
+  getTemplate() {
+    return `
+    <section class="main__search search container">
+      <input
+        type="text"
+        id="search__input"
+        class="search__input"
+        placeholder="${this._placeholder}"
+        />
+      <label class="visually-hidden" for="search__input">${this._label}</label>
+    <section>`;
+  }
+}
 
-export const createSearch = (params) => {
-  render(searchWrapper, `beforeend`, createSearchTemplate, params);
-  return searchWrapper;
-};
+export default Search;

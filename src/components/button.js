@@ -1,7 +1,8 @@
 import {createElement} from '../utils';
 
-class Board {
-  constructor() {
+class Button {
+  constructor(title) {
+    this._title = title;
     this._element = null;
   }
 
@@ -13,11 +14,8 @@ class Board {
   }
 
   getTemplate() {
-    return `
-    <section class="board container">
-      <div class="board__tasks"></div>
-    </section>`;
+    return `<button class="load-more" type="button">${this._title}</button>`;
   }
 }
 
-export default Board;
+export default Button;
