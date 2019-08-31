@@ -1,24 +1,25 @@
-// import {makeTask} from './task';
-// import {makeTaskEditForm} from './task-edit';
-
-// const makeTaskList = (taskList, count, begin, initial) => {
-//   const end = begin + count;
-//   const tasks = taskList.slice(begin, end);
-//   const list = [];
-
-//   tasks.forEach((task, index) => {
-//     if (initial && index === 0) {
-//       list.push(makeTaskEditForm(task));
-//     } else {
-//       list.push(makeTask(task));
-//     }
-
-//   });
-//   return list.join(``);
-// };
+import {createElement} from '../utils';
 
 
-// export const renderTasks = (container, taskList, count, begin, initial = false) => {
-//   container.insertAdjacentHTML(`beforeend`, makeTaskList(taskList, count, begin, initial));
-// };
+class TaskList {
+  constructor() {
+    this._element = null;
+  }
 
+  getElement() {
+    if (!this._element) {
+      this._element = createElement(this.getTemplate());
+    }
+    return this._element;
+  }
+
+  removeElement() {
+    this._element = null;
+  }
+
+  getTemplate() {
+    return `<div class="board__tasks"></div>`;
+  }
+}
+
+export default TaskList;

@@ -14,6 +14,10 @@ class Search {
     return this._element;
   }
 
+  removeElement() {
+    this._element = null;
+  }
+
   getTemplate() {
     return `
     <section class="main__search search container">
