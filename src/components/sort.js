@@ -1,5 +1,6 @@
 import {createElement} from '../utils';
 
+
 class Sort {
   constructor(items) {
     this._items = items;
@@ -11,6 +12,10 @@ class Sort {
       this._element = createElement(this.getTemplate());
     }
     return this._element;
+  }
+
+  removeElement() {
+    this._element = null;
   }
 
   getTemplate() {

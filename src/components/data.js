@@ -98,6 +98,7 @@ const getTask = () => ({
   ][Math.floor(Math.random() * 5)],
   isFavorite: getRandomBoolean(),
   isArchive: getRandomBoolean()
+  // isArchive: true
 });
 
 const getTaskList = (count) => Array.from(new Array(count), () => getTask());

@@ -1,4 +1,5 @@
 import {render} from './utils';
+import {unrender} from './utils';
 import {Position} from './utils';
 
 import Menu from './components/menu';
@@ -8,26 +9,25 @@ import Sort from './components/sort';
 import Board from './components/board';
 import Task from './components/task';
 import TaskEdit from './components/task-edit';
-// import Button from './components/button';
+import TaskList from './components/task-list';
+import Message from './components/message';
+import Button from './components/button';
 
 import data from './components/data';
 
-// const TASKS_TO_LOAD = 8;
+const TASKS_TO_LOAD = 8;
 
-const siteMain = document.querySelector(`.main`);
-const siteControl = siteMain.querySelector(`.main__control`);
-
-const renderMenu = (menuItems) => {
+const renderMenu = (container, menuItems) => {
   const menu = new Menu(menuItems);
-  render(siteControl, menu.getElement(), Position.BEFOREEND);
+  render(container, menu.getElement(), Position.BEFOREEND);
 };
 
-const renderSearch = (searchItem) => {
+const renderSearch = (container, searchItem) => {
   const search = new Search(searchItem);
-  render(siteMain, search.getElement(), Position.BEFOREEND);
+  render(container, search.getElement(), Position.BEFOREEND);
 };
 
-const renderFilter = (filterItems, taskList) => {
+const renderFilter = (container, filterItems, taskList) => {
 
   const tasksCount = {
     all: taskList.length,
@@ -52,27 +52,34 @@ const renderFilter = (filterItems, taskList) => {
   });
 
   const filter = new Filter(filterItems);
-  render(siteMain, filter.getElement(), Position.BEFOREEND);
+  render(container, filter.getElement(), Position.BEFOREEND);
 };
 
-const renderBoard = () => {
+const renderSort = (container, sortItems) => {
+  const sort = new Sort(sortItems);
+  render(container, sort.getElement(), Position.AFTERBEGIN);
+  return sort;
+};
+
+const renderBoard = (container) => {
   const board = new Board();
-  render(siteMain, board.getElement(), Position.BEFOREEND);
+  render(container, board.getElement(), Position.BEFOREEND);
   return board;
 };
 
-const renderSort = (sortItems) => {
-  const sort = new Sort(sortItems);
-  render(siteBoard, sort.getElement(), Position.AFTERBEGIN);
+const renderTasksWrapper = (container) => {
+  const tasksWrapper = new TaskList();
+  render(container, tasksWrapper.getElement(), Position.AFTERBEGIN);
+  return tasksWrapper;
 };
 
-const renderTask = (taskMock) => {
+const renderTask = (container, taskMock) => {
   const task = new Task(taskMock);
   const taskEdit = new TaskEdit(taskMock);
 
   const onEscKeyDown = (evt) => {
     if (evt.key === `Escape` || evt.key === `Esc`) {
-      tasksWrapper.replaceChild(task.getElement(), taskEdit.getElement());
+      container.replaceChild(task.getElement(), taskEdit.getElement());
       document.removeEventListener(`keydown`, onEscKeyDown);
     }
   };
@@ -81,7 +88,7 @@ const renderTask = (taskMock) => {
     .querySelector(`.card__btn--edit`)
     .addEventListener(`click`, (e) => {
       e.preventDefault();
-      tasksWrapper.replaceChild(taskEdit.getElement(), task.getElement());
+      container.replaceChild(taskEdit.getElement(), task.getElement());
       document.addEventListener(`keydown`, onEscKeyDown);
     });
 
@@ -89,41 +96,86 @@ const renderTask = (taskMock) => {
     .querySelector(`.card__form`)
     .addEventListener(`submit`, (e) => {
       e.preventDefault();
-      tasksWrapper.replaceChild(task.getElement(), taskEdit.getElement());
+      container.replaceChild(task.getElement(), taskEdit.getElement());
       document.removeEventListener(`keydown`, onEscKeyDown);
     });
 
-  render(tasksWrapper, task.getElement(), Position.BEFOREEND);
+  taskEdit.getElement()
+    .querySelector(`.card__text`)
+    .addEventListener(`focus`, () => {
+      document.removeEventListener(`keydown`, onEscKeyDown);
+    });
+
+  taskEdit.getElement()
+    .querySelector(`.card__text`)
+    .addEventListener(`blur`, () => {
+      document.addEventListener(`keydown`, onEscKeyDown);
+    });
+
+  render(container, task.getElement(), Position.BEFOREEND);
 };
 
-renderMenu(data.menu);
-renderSearch(data.search);
-renderFilter(data.filter, data.taskList);
+const renderTaskList = (container, taskList, tasksToLoad, startIndex = 0) => {
+  const endIndex = startIndex + tasksToLoad;
+  const tasks = taskList.slice(startIndex, endIndex);
 
-const board = renderBoard();
+  tasks.forEach((task) => {
+    renderTask(container, task);
+  });
+};
 
-const siteBoard = board.getElement();
+const renderButton = (container, tasksContainer, taskList, tasksToLoad) => {
+  const button = new Button(`load more`);
+  render(container, button.getElement(), Position.BEFOREEND);
 
-renderSort(data.sort);
+  button.getElement()
+    .addEventListener(`click`, (e) => {
+      e.preventDefault();
+      const tasksCount = tasksContainer.childElementCount;
+      const tasksLeft = taskList.length - tasksCount;
 
-const tasksWrapper = siteBoard.querySelector(`.board__tasks`);
+      renderTaskList(tasksContainer, taskList, tasksToLoad, tasksCount);
 
-data.taskList.forEach((task) => renderTask(task));
+      if (tasksLeft < TASKS_TO_LOAD) {
+        unrender(button.getElement());
+      }
+    });
+  return button;
+};
 
-// render(siteBoard, `beforeend`, createMoreButtonTemplate, `load more`);
+const isAllArchive = (taskList) => {
+  return taskList.filter((task) => task.isArchive).length === taskList.length;
+};
 
-// const getTasksCount = () => tasksWrapper.childElementCount;
+const initBoard = (taskList) => {
 
-// const loadMoreButton = siteMain.querySelector(`.load-more`);
+  const siteMain = document.querySelector(`.main`);
+  const siteControl = siteMain.querySelector(`.main__control`);
 
-// loadMoreButton.addEventListener(`click`, (e) => {
-//   e.preventDefault();
-//   const tasksCount = getTasksCount();
-//   const tasksLeft = data.taskList.length - tasksCount;
+  renderMenu(siteControl, data.menu);
+  renderSearch(siteMain, data.search);
+  renderFilter(siteMain, data.filter, data.taskList);
 
-//   renderTasks(tasksWrapper, data.taskList, TASKS_TO_LOAD, tasksCount);
+  const board = renderBoard(siteMain);
+  const boardElement = board.getElement();
 
-//   if (tasksLeft < TASKS_TO_LOAD) {
-//     loadMoreButton.style.display = `none`;
-//   }
-// });
+  const tasksWrapper = renderTasksWrapper(boardElement);
+  const tasksWrapperElement = tasksWrapper.getElement();
+
+  const tasksSort = renderSort(boardElement, data.sort);
+  const tasksSortElement = tasksSort.getElement();
+
+  if (taskList.length === 0 || isAllArchive(taskList)) {
+    const message = new Message(`no-tasks`);
+    render(boardElement, message.getElement(), Position.AFTERBEGIN);
+    unrender(tasksSortElement);
+    unrender(tasksWrapperElement);
+    tasksSort.removeElement();
+
+  } else {
+    renderTaskList(tasksWrapperElement, taskList, TASKS_TO_LOAD);
+    renderButton(boardElement, tasksWrapperElement, taskList, TASKS_TO_LOAD);
+  }
+};
+
+initBoard(data.taskList);

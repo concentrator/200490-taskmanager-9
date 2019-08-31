@@ -1,5 +1,6 @@
 import {createElement} from '../utils';
 
+
 class Board {
   constructor() {
     this._element = null;
@@ -12,11 +13,12 @@ class Board {
     return this._element;
   }
 
+  removeElement() {
+    this._element = null;
+  }
+
   getTemplate() {
-    return `
-    <section class="board container">
-      <div class="board__tasks"></div>
-    </section>`;
+    return `<section class="board container"></section>`;
   }
 }
 
