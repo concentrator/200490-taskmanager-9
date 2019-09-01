@@ -1,4 +1,4 @@
-import {createElement} from '../utils';
+import AbstractComponent from './abstract-component';
 
 const MESSAGE = {
   'no-tasks': `Congratulations, all tasks were completed! To create a new click on
@@ -6,10 +6,10 @@ const MESSAGE = {
 };
 
 
-class Message {
+class Message extends AbstractComponent {
   constructor(type) {
+    super();
     this._type = type;
-    this._element = null;
   }
 
   _getCssClass() {
@@ -20,17 +20,6 @@ class Message {
         break;
     }
     return cssClass;
-  }
-
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-    return this._element;
-  }
-
-  removeElement() {
-    this._element = null;
   }
 
   getTemplate() {
