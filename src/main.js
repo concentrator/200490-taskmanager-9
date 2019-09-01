@@ -79,8 +79,10 @@ const renderTask = (container, taskMock) => {
 
   const onEscKeyDown = (evt) => {
     if (evt.key === `Escape` || evt.key === `Esc`) {
-      container.replaceChild(task.getElement(), taskEdit.getElement());
-      document.removeEventListener(`keydown`, onEscKeyDown);
+      if (evt.target !== taskEdit.getElement().querySelector(`.card__text`)) {
+        container.replaceChild(task.getElement(), taskEdit.getElement());
+        document.removeEventListener(`keydown`, onEscKeyDown);
+      }
     }
   };
 
@@ -98,18 +100,6 @@ const renderTask = (container, taskMock) => {
       e.preventDefault();
       container.replaceChild(task.getElement(), taskEdit.getElement());
       document.removeEventListener(`keydown`, onEscKeyDown);
-    });
-
-  taskEdit.getElement()
-    .querySelector(`.card__text`)
-    .addEventListener(`focus`, () => {
-      document.removeEventListener(`keydown`, onEscKeyDown);
-    });
-
-  taskEdit.getElement()
-    .querySelector(`.card__text`)
-    .addEventListener(`blur`, () => {
-      document.addEventListener(`keydown`, onEscKeyDown);
     });
 
   render(container, task.getElement(), Position.BEFOREEND);
