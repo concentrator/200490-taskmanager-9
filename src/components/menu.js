@@ -1,20 +1,25 @@
-import {createElement} from '../utils';
+import AbstractComponent from './abstract-component';
 
-class Menu {
-  constructor(items) {
-    this._items = items;
-    this._element = null;
-  }
+const MENU_ITEMS = [
+  {
+    id: `new-task`,
+    label: `+ ADD NEW TASK`
+  },
+  {
+    id: `task`,
+    label: `TASKS`,
+    isChecked: true
+  },
+  {
+    id: `statistic`,
+    label: `STATISTICS`
+  },
+];
 
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-    return this._element;
-  }
-
-  removeElement() {
-    this._element = null;
+class Menu extends AbstractComponent {
+  constructor() {
+    super();
+    this._items = MENU_ITEMS;
   }
 
   getTemplate() {

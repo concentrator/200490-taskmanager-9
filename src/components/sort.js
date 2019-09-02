@@ -1,21 +1,15 @@
-import {createElement} from '../utils';
+import AbstractComponent from './abstract-component';
 
+const SORT_ITEMS = [
+  {title: `DEFAULT`},
+  {title: `DATE up`},
+  {title: `DATE down`}
+];
 
-class Sort {
-  constructor(items) {
-    this._items = items;
-    this._element = null;
-  }
-
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-    return this._element;
-  }
-
-  removeElement() {
-    this._element = null;
+class Sort extends AbstractComponent {
+  constructor() {
+    super();
+    this._items = SORT_ITEMS;
   }
 
   getTemplate() {
