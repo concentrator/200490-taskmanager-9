@@ -1,10 +1,25 @@
 import AbstractComponent from './abstract-component';
 
+const MENU_ITEMS = [
+  {
+    id: `new-task`,
+    label: `+ ADD NEW TASK`
+  },
+  {
+    id: `task`,
+    label: `TASKS`,
+    isChecked: true
+  },
+  {
+    id: `statistic`,
+    label: `STATISTICS`
+  },
+];
 
 class Menu extends AbstractComponent {
-  constructor(items) {
+  constructor() {
     super();
-    this._items = items;
+    this._items = MENU_ITEMS;
   }
 
   getTemplate() {

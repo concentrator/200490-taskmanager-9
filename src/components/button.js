@@ -1,9 +1,11 @@
 import AbstractComponent from './abstract-component';
 
+const TEXT = `load more`;
+
 class Button extends AbstractComponent {
-  constructor(title) {
+  constructor() {
     super();
-    this._title = title;
+    this._title = TEXT;
   }
 
   getTemplate() {

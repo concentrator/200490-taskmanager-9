@@ -1,10 +1,15 @@
 import AbstractComponent from './abstract-component';
 
+const SORT_ITEMS = [
+  {title: `DEFAULT`},
+  {title: `DATE up`},
+  {title: `DATE down`}
+];
 
 class Sort extends AbstractComponent {
-  constructor(items) {
+  constructor() {
     super();
-    this._items = items;
+    this._items = SORT_ITEMS;
   }
 
   getTemplate() {
