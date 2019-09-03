@@ -16,7 +16,7 @@ const TASKS_TO_LOAD = 8;
 class BoardController {
   constructor(container, tasks) {
     this._container = container;
-    this._tasks = tasks;
+    this._tasks = tasks.slice().sort((a, b) => a.createdDate - b.createdDate);
     this._tasksCount = TASKS_TO_LOAD;
     this._board = new Board();
     this._taskList = new TaskList();
@@ -55,6 +55,7 @@ class BoardController {
         const tasksLeft = this._tasks.length - this._tasksCount;
 
         this._renderTaskList(this._tasks, this._tasksCount, TASKS_TO_LOAD);
+        this._tasksCount += TASKS_TO_LOAD;
 
         if (tasksLeft < TASKS_TO_LOAD) {
           unrender(this._button.getElement());
@@ -74,17 +75,18 @@ class BoardController {
 
     switch (e.target.dataset.sortType) {
       case `date-up`:
-        const sortedByDateUpTasks = this._tasks.slice().sort((a, b) => a.dueDate - b.dueDate);
+        const sortedByDateUpTasks = this._tasks.sort((a, b) => a.dueDate - b.dueDate);
         this._renderTaskList(sortedByDateUpTasks, 0, this._tasksCount);
         break;
 
       case `date-down`:
-        const sortedByDateDownTasks = this._tasks.slice().sort((a, b) => b.dueDate - a.dueDate);
+        const sortedByDateDownTasks = this._tasks.sort((a, b) => b.dueDate - a.dueDate);
         this._renderTaskList(sortedByDateDownTasks, 0, this._tasksCount);
         break;
 
       case `default`:
-        this._renderTaskList();
+        const sortedByDefaultTasks = this._tasks.sort((a, b) => a.createdDate - b.createdDate)
+        this._renderTaskList(sortedByDefaultTasks, 0, this._tasksCount);
         break;
     }
   }
