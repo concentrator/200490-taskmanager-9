@@ -101,7 +101,15 @@ const getTask = () => ({
   // isArchive: true
 });
 
-const getTaskList = (count) => Array.from(new Array(count), () => getTask());
+const getTaskList = (count) => {
+  let i = 0;
+  return Array.from(new Array(count), () => {
+    const task = getTask();
+    task.createdDate = Date.now() + i++;
+    return task;
+  });
+};
+
 
 const taskList = getTaskList(33);
 
