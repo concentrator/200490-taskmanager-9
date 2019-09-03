@@ -17,6 +17,7 @@ class BoardController {
   constructor(container, tasks) {
     this._container = container;
     this._tasks = tasks;
+    this._tasksCount = TASKS_TO_LOAD;
     this._board = new Board();
     this._taskList = new TaskList();
     this._sort = new Sort();
@@ -30,7 +31,7 @@ class BoardController {
     const tasksWrapperElement = this._taskList.getElement();
     render(boardElement, tasksWrapperElement, Position.AFTERBEGIN);
 
-    if (this._taskList.length === 0 || this.isAllArchive(this._taskList)) {
+    if (this._taskList.length === 0 || this._isAllArchive(this._taskList)) {
 
       const message = new Message(`no-tasks`);
       render(boardElement, message.getElement(), Position.AFTERBEGIN);
@@ -39,32 +40,60 @@ class BoardController {
     } else {
 
       const sortElement = this._sort.getElement();
+
+      sortElement.addEventListener(`click`, (e) => this._onSortLinkClick(e));
+
       render(boardElement, sortElement, Position.AFTERBEGIN);
 
-      this.renderTaskList();
+      this._renderTaskList();
 
       render(this._board.getElement(), this._button.getElement(), Position.BEFOREEND);
 
       this._button.getElement().addEventListener(`click`, (e) => {
         e.preventDefault();
-        const tasksCount = this._taskList.getElement().childElementCount;
-        const tasksLeft = this._tasks.length - tasksCount;
+        this._tasksCount = this._taskList.getElement().childElementCount;
+        const tasksLeft = this._tasks.length - this._tasksCount;
 
-        this.renderTaskList(tasksCount);
+        this._renderTaskList(this._tasks, this._tasksCount, TASKS_TO_LOAD);
 
         if (tasksLeft < TASKS_TO_LOAD) {
           unrender(this._button.getElement());
         }
       });
     }
-
   }
 
-  isAllArchive() {
+  _onSortLinkClick(e) {
+
+    e.preventDefault();
+    if (e.target.nodeName !== `A`) {
+      return;
+    }
+
+    this._taskList.getElement().innerHTML = ``;
+
+    switch (e.target.dataset.sortType) {
+      case `date-up`:
+        const sortedByDateUpTasks = this._tasks.slice().sort((a, b) => a.dueDate - b.dueDate);
+        this._renderTaskList(sortedByDateUpTasks, 0, this._tasksCount);
+        break;
+
+      case `date-down`:
+        const sortedByDateDownTasks = this._tasks.slice().sort((a, b) => b.dueDate - a.dueDate);
+        this._renderTaskList(sortedByDateDownTasks, 0, this._tasksCount);
+        break;
+
+      case `default`:
+        this._renderTaskList();
+        break;
+    }
+  }
+
+  _isAllArchive() {
     return this._tasks.filter((task) => task.isArchive).length === this._tasks.length;
   }
 
-  renderTask(task) {
+  _renderTask(task) {
     const taskComponent = new Task(task);
     const taskEditComponent = new TaskEdit(task);
 
@@ -96,12 +125,12 @@ class BoardController {
     render(this._taskList.getElement(), taskComponent.getElement(), Position.BEFOREEND);
   }
 
-  renderTaskList(startIndex = 0) {
-    const endIndex = startIndex + TASKS_TO_LOAD;
-    const tasks = this._tasks.slice(startIndex, endIndex);
+  _renderTaskList(tasks = this._tasks, startIndex = 0, count = this._tasksCount) {
+    const endIndex = startIndex + count;
+    const tasksToRender = tasks.slice(startIndex, endIndex);
 
-    tasks.forEach((task) => {
-      this.renderTask(task);
+    tasksToRender.forEach((task) => {
+      this._renderTask(task);
     });
   }
 }

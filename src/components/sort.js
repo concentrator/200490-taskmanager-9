@@ -16,8 +16,10 @@ class Sort extends AbstractComponent {
     return `
     <div class="board__filter-list">
     ${this._items.map((item) => `
-      <a href="${item.url ? item.url : `#`}" class="board__filter">SORT BY ${item.title}</a>`)
-      .join(``)}
+      <a href="${item.url ? item.url : `#`}"
+      class="board__filter" data-sort-type="${item.title.toLowerCase().split(` `).join(`-`)}">
+        SORT BY ${item.title}
+      </a>`).join(``)}
     </div>`;
   }
 }
