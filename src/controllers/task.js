@@ -1,3 +1,7 @@
+import flatpickr from 'flatpickr';
+import 'flatpickr/dist/flatpickr.min.css';
+import 'flatpickr/dist/themes/light.css';
+
 import {render} from '../utils';
 import {Position} from '../utils';
 
@@ -37,6 +41,12 @@ class TaskController {
   }
 
   _addEditEventSubscribtion() {
+    flatpickr(this._taskEdit.getElement().querySelector(`.card__date`), {
+      altInput: true,
+      allowInput: true,
+      defaultDate: this._data.dueDate,
+    });
+
     const taskEditForm = this._taskEdit.getElement().querySelector(`.card__form`);
     taskEditForm.addEventListener(`submit`, (e) => {
       e.preventDefault();
