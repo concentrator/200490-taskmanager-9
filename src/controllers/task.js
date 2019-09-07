@@ -1,7 +1,3 @@
-import flatpickr from 'flatpickr';
-import 'flatpickr/dist/flatpickr.min.css';
-import 'flatpickr/dist/themes/light.css';
-
 import {render} from '../utils';
 import {Position} from '../utils';
 
@@ -13,40 +9,46 @@ class TaskController {
     this._container = container;
     this._data = data;
     this._taskView = new Task(data);
-    this._taskEdit = new TaskEdit(data);
+    this._taskEdit = null;
     this._onChangeView = onChangeView;
     this._onDataChange = onDataChange;
     this._onEscKeyDown = this._onEscKeyDown.bind(this);
     this.create();
   }
 
+  _replaceEditWithView() {
+    this._container.getElement().replaceChild(this._taskView.getElement(), this._taskEdit.getElement());
+    this._taskEdit.destroy();
+    this._taskEdit = null;
+  }
+
   _onEscKeyDown(evt) {
     if (evt.key === `Escape` || evt.key === `Esc`) {
       if (evt.target !== this._taskEdit.getElement().querySelector(`.card__text`)) {
-        this._container.getElement().replaceChild(this._taskView.getElement(), this._taskEdit.getElement());
+        this._replaceEditWithView();
         document.removeEventListener(`keydown`, this._onEscKeyDown);
       }
     }
   }
 
-  _addViewEventSubscribtion() {
+  _subscribeOnViewEvents() {
     this._taskView.getElement()
     .querySelector(`.card__btn--edit`)
     .addEventListener(`click`, (e) => {
       e.preventDefault();
+      this._taskEdit = new TaskEdit(this._data);
+      this._subscribeOnEditEvents();
       this._onChangeView();
       this._container.getElement().replaceChild(this._taskEdit.getElement(), this._taskView.getElement());
       document.addEventListener(`keydown`, this._onEscKeyDown);
     });
   }
 
-  _addEditEventSubscribtion() {
-    flatpickr(this._taskEdit.getElement().querySelector(`.card__date`), {
-      altInput: true,
-      allowInput: true,
-      defaultDate: this._data.dueDate,
-    });
+  _subscribeOnEditEvents() {
 
+    if (!this._taskEdit) {
+      return;
+    }
     const taskEditForm = this._taskEdit.getElement().querySelector(`.card__form`);
     taskEditForm.addEventListener(`submit`, (e) => {
       e.preventDefault();
@@ -56,7 +58,7 @@ class TaskController {
         description: formData.get(`text`),
         color: formData.get(`color`),
         tags: new Set(formData.getAll(`hashtag`)),
-        dueDate: Date.parse(formData.get(`date`)),
+        dueDate: formData.get(`date`) ? Date.parse(formData.get(`date`)) : null,
         repeatingDays: formData.getAll(`repeat`).reduce((acc, it) => {
           acc[it] = true;
           return acc;
@@ -74,33 +76,26 @@ class TaskController {
       this._onDataChange(entry, this._data);
 
       this._data = entry;
-
       this._taskView.removeElement();
-
       this._taskView = new Task(this._data);
-      this._addViewEventSubscribtion();
+      this._subscribeOnViewEvents();
 
-      this._container.getElement().replaceChild(this._taskView.getElement(), this._taskEdit.getElement());
-
-      this._taskEdit.removeElement();
-
-      this._taskEdit = new TaskEdit(this._data);
-      this._addEditEventSubscribtion();
+      this._replaceEditWithView();
 
       document.removeEventListener(`keydown`, this._onEscKeyDown);
     });
+
   }
 
   setDefaultView() {
     document.removeEventListener(`keydown`, this._onEscKeyDown);
-    if (this._container.getElement().contains(this._taskEdit.getElement())) {
-      this._container.getElement().replaceChild(this._taskView.getElement(), this._taskEdit.getElement());
+    if (this._taskEdit && this._container.getElement().contains(this._taskEdit.getElement())) {
+      this._replaceEditWithView();
     }
   }
 
   create() {
-    this._addViewEventSubscribtion();
-    this._addEditEventSubscribtion();
+    this._subscribeOnViewEvents();
 
     render(this._container.getElement(), this._taskView.getElement(), Position.BEFOREEND);
   }

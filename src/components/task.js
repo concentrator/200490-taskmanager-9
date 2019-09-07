@@ -5,7 +5,7 @@ class Task extends AbstractComponent {
   constructor({description, dueDate, tags, color, repeatingDays}) {
     super();
     this._description = description;
-    this._dueDate = new Date(dueDate);
+    this._dueDate = dueDate;
     this._tags = tags;
     this._color = color;
     this._repeatingDays = repeatingDays;
@@ -46,7 +46,7 @@ class Task extends AbstractComponent {
               <div class="card__dates">
                 <div class="card__date-deadline">
                   <p class="card__input-deadline-wrap">
-                    <span class="card__date">${new Date(this._dueDate).toDateString()}</span>
+                    <span class="card__date">${this._dueDate ? new Date(this._dueDate).toDateString() : ``}</span>
                     <span class="card__time"></span>
                   </p>
                 </div>
