@@ -34,7 +34,7 @@ class BoardController {
     const tasksWrapperElement = this._taskList.getElement();
     render(boardElement, tasksWrapperElement, Position.AFTERBEGIN);
 
-    if (this._taskList.length === 0 || this._isAllArchive(this._taskList)) {
+    if (this._taskList.length === 0 || this._isAllArchive()) {
 
       const message = new Message(`no-tasks`);
       render(boardElement, message.getElement(), Position.AFTERBEGIN);
@@ -110,7 +110,6 @@ class BoardController {
 
   _onDataChange(newData, oldData) {
     this._tasks[this._tasks.findIndex((it) => it === oldData)] = newData;
-
   }
 
   _renderTaskList(tasks = this._tasks, startIndex = 0, count = this._tasksCount) {
