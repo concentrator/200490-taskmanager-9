@@ -73,13 +73,13 @@ const getTask = () => ({
   dueDate: Date.now() + 1 + Math.floor(Math.random() * 7) * 24 * 60 * 60 * 1000,
   // dueDate: new Date(),
   repeatingDays: {
-    'Mo': false,
-    'Tu': false,
-    'We': getRandomBoolean(),
-    'Th': false,
-    'Fr': getRandomBoolean(),
-    'Sa': false,
-    'Su': false,
+    'mo': false,
+    'tu': false,
+    'we': getRandomBoolean(),
+    'th': false,
+    'fr': getRandomBoolean(),
+    'sa': false,
+    'su': false,
   },
   tags: new Set(shuffleArray([
     `homework`,
@@ -96,9 +96,9 @@ const getTask = () => ({
     `green`,
     `pink`,
   ][Math.floor(Math.random() * 5)],
-  isFavorite: getRandomBoolean(),
-  isArchive: getRandomBoolean()
+  isArchive: getRandomBoolean(),
   // isArchive: true
+  isFavorite: getRandomBoolean(),
 });
 
 const getTaskList = (count) => {
