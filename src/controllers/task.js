@@ -31,6 +31,16 @@ class TaskController {
     }
   }
 
+  _onButtonClick(e) {
+    if (e.currentTarget.classList.contains(`card__btn--disabled`)) {
+      e.currentTarget.classList.remove(`card__btn--disabled`);
+      return true;
+    } else {
+      e.currentTarget.classList.add(`card__btn--disabled`);
+      return false;
+    }
+  }
+
   _subscribeOnViewEvents() {
     this._taskView.getElement()
     .querySelector(`.card__btn--edit`)
@@ -42,6 +52,24 @@ class TaskController {
       this._container.getElement().replaceChild(this._taskEdit.getElement(), this._taskView.getElement());
       document.addEventListener(`keydown`, this._onEscKeyDown);
     });
+
+    this._taskView.getElement()
+    .querySelector(`.card__btn--archive`)
+    .addEventListener(`click`, (e) => {
+      const entry = Object.assign({}, this._data);
+      entry.isArchive = this._onButtonClick(e);
+      this._onDataChange(entry, this._data);
+      this._data = entry;
+    });
+
+    this._taskView.getElement()
+    .querySelector(`.card__btn--favorites`)
+    .addEventListener(`click`, (e) => {
+      const entry = Object.assign({}, this._data);
+      entry.isFavorite = this._onButtonClick(e);
+      this._onDataChange(entry, this._data);
+      this._data = entry;
+    });
   }
 
   _subscribeOnEditEvents() {
@@ -49,6 +77,21 @@ class TaskController {
     if (!this._taskEdit) {
       return;
     }
+
+    let isArchive = this._data.isArchive;
+    this._taskEdit.getElement()
+    .querySelector(`.card__btn--archive`)
+    .addEventListener(`click`, (e) => {
+      isArchive = this._onButtonClick(e);
+    });
+
+    let isFavorite = this._data.isFavorite;
+    this._taskEdit.getElement()
+    .querySelector(`.card__btn--favorites`)
+    .addEventListener(`click`, (e) => {
+      isFavorite = this._onButtonClick(e);
+    });
+
     const taskEditForm = this._taskEdit.getElement().querySelector(`.card__form`);
     taskEditForm.addEventListener(`submit`, (e) => {
       e.preventDefault();
@@ -70,12 +113,14 @@ class TaskController {
           'fr': false,
           'sa': false,
           'su': false,
-        })
+        }),
+        isArchive,
+        isFavorite
       };
 
       this._onDataChange(entry, this._data);
-
       this._data = entry;
+
       this._taskView.removeElement();
       this._taskView = new Task(this._data);
       this._subscribeOnViewEvents();

@@ -15,7 +15,7 @@ const COLORS = [
 ];
 
 class TaskEdit extends AbstractComponent {
-  constructor({description, dueDate, tags, color, repeatingDays}) {
+  constructor({description, dueDate, tags, color, repeatingDays, isArchive, isFavorite}) {
     super();
     this._description = description;
     this._dueDate = dueDate;
@@ -25,6 +25,8 @@ class TaskEdit extends AbstractComponent {
     this._color = color;
     this._repeatingDays = repeatingDays;
     this._isRepeating = this._isRepeating();
+    this._isArchive = isArchive;
+    this._isFavorite = isFavorite;
     this._subscribeOnEvents();
   }
 
@@ -176,13 +178,13 @@ class TaskEdit extends AbstractComponent {
       <form class="card__form" method="get">
         <div class="card__inner">
           <div class="card__control">
-            <button type="button" class="card__btn card__btn--archive">
+            <button type="button"
+              class="card__btn card__btn--archive ${!this._isArchive ? `card__btn--disabled` : ``}">
               archive
             </button>
             <button
               type="button"
-              class="card__btn card__btn--favorites card__btn--disabled"
-            >
+              class="card__btn card__btn--favorites ${!this._isFavorite ? `card__btn--disabled` : ``}">
               favorites
             </button>
           </div>
@@ -229,7 +231,7 @@ class TaskEdit extends AbstractComponent {
                   </span>
                 </button>
 
-                <fieldset class="card__repeat-days">
+                <fieldset class="card__repeat-days" ${!this._isRepeating ? `hidden` : ``}>
                 ${this._getRepeatDaysTemplate()}
                 </fieldset>
               </div>

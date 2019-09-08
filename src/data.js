@@ -96,9 +96,9 @@ const getTask = () => ({
     `green`,
     `pink`,
   ][Math.floor(Math.random() * 5)],
-  isFavorite: getRandomBoolean(),
-  isArchive: getRandomBoolean()
+  isArchive: getRandomBoolean(),
   // isArchive: true
+  isFavorite: getRandomBoolean(),
 });
 
 const getTaskList = (count) => {

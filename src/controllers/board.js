@@ -28,26 +28,18 @@ class BoardController {
   }
 
   init() {
-    const boardElement = this._board.getElement();
-    render(this._container, boardElement, Position.BEFOREEND);
-
-    const tasksWrapperElement = this._taskList.getElement();
-    render(boardElement, tasksWrapperElement, Position.AFTERBEGIN);
+    render(this._container, this._board.getElement(), Position.BEFOREEND);
+    render(this._board.getElement(), this._taskList.getElement(), Position.AFTERBEGIN);
 
     if (this._taskList.length === 0 || this._isAllArchive()) {
 
       const message = new Message(`no-tasks`);
-      render(boardElement, message.getElement(), Position.AFTERBEGIN);
-      unrender(tasksWrapperElement);
+      render(this._board.getElement(), message.getElement(), Position.AFTERBEGIN);
+      unrender(this._taskList.getElement());
 
     } else {
 
-      const sortElement = this._sort.getElement();
-
-      sortElement.addEventListener(`click`, (e) => this._onSortLinkClick(e));
-
-      render(boardElement, sortElement, Position.AFTERBEGIN);
-
+      this._renderSort();
       this._renderTaskList();
 
       render(this._board.getElement(), this._button.getElement(), Position.BEFOREEND);
@@ -65,6 +57,11 @@ class BoardController {
         }
       });
     }
+  }
+
+  _renderSort() {
+    this._sort.getElement().addEventListener(`click`, (e) => this._onSortLinkClick(e));
+    render(this._board.getElement(), this._sort.getElement(), Position.AFTERBEGIN);
   }
 
   _onSortLinkClick(e) {
