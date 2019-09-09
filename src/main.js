@@ -1,5 +1,4 @@
 import {render} from './utils';
-import {unrender} from './utils';
 import {Position} from './utils';
 
 import Menu from './components/menu';

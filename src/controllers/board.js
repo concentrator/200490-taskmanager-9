@@ -107,6 +107,7 @@ class BoardController {
 
   _onDataChange(newData, oldData) {
     this._tasks[this._tasks.findIndex((it) => it === oldData)] = newData;
+    return true;
   }
 
   _renderTaskList(tasks = this._tasks, startIndex = 0, count = this._tasksCount) {

@@ -2,6 +2,7 @@ import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
 import 'flatpickr/dist/themes/light.css';
 
+import {getFormattedDate} from '../utils';
 import {unrender} from '../utils';
 
 import AbstractComponent from './abstract-component';
@@ -62,6 +63,7 @@ class TaskEdit extends AbstractComponent {
   _initFlatpickr() {
     this._calendar =
     flatpickr(this.getElement().querySelector(`.card__date`), {
+      altFormat: `j F`,
       altInput: true,
       allowInput: true,
       defaultDate: this._dueDate ? this._dueDate : Date.now(),
@@ -220,7 +222,7 @@ class TaskEdit extends AbstractComponent {
                       type="text"
                       placeholder=""
                       name="date"
-                      value="${new Date(this._dueDate).toDateString()}"
+                      value="${getFormattedDate(this._dueDate)}"
                     />
                   </label>
                 </fieldset>

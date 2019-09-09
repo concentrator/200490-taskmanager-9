@@ -25,3 +25,14 @@ export const unrender = (element) => {
     element.remove();
   }
 };
+
+export const getFormattedDate = (date) => {
+  if (!date) {
+    return ``;
+  }
+  let f = new Date(date)
+    .toLocaleDateString(`en-US`, {month: `long`, day: `numeric`})
+    .split(` `);
+  [f[0], f[1]] = [f[1], f[0]];
+  return f.join(` `);
+};

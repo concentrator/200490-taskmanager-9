@@ -1,3 +1,5 @@
+import {getFormattedDate} from '../utils';
+
 import AbstractComponent from './abstract-component';
 
 
@@ -48,7 +50,7 @@ class Task extends AbstractComponent {
               <div class="card__dates">
                 <div class="card__date-deadline">
                   <p class="card__input-deadline-wrap">
-                    <span class="card__date">${this._dueDate ? new Date(this._dueDate).toDateString() : ``}</span>
+                    <span class="card__date">${getFormattedDate(this._dueDate)}</span>
                     <span class="card__time"></span>
                   </p>
                 </div>
