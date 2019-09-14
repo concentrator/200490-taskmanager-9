@@ -66,7 +66,7 @@ class TaskEdit extends AbstractComponent {
       altFormat: `j F`,
       altInput: true,
       allowInput: true,
-      defaultDate: this._dueDate ? this._dueDate : Date.now(),
+      defaultDate: this._dueDate ? this._dueDate : new Date(),
     });
   }
 

@@ -1,19 +1,32 @@
 import {render} from '../utils';
+import {unrender} from '../utils';
 import {Position} from '../utils';
 
 import Task from '../components/task';
 import TaskEdit from '../components/task-edit';
 
 class TaskController {
-  constructor(container, data, onDataChange, onChangeView) {
+  constructor(container, task, onDataChange, onChangeView) {
     this._container = container;
-    this._data = data;
-    this._taskView = new Task(data);
+    this._task = task;
+    this._taskView = new Task(task);
     this._taskEdit = null;
     this._onChangeView = onChangeView;
     this._onDataChange = onDataChange;
     this._onEscKeyDown = this._onEscKeyDown.bind(this);
     this.create();
+  }
+
+  create() {
+    this._subscribeOnViewEvents();
+    render(this._container.getElement(), this._taskView.getElement(), Position.BEFOREEND);
+  }
+
+  setDefaultView() {
+    document.removeEventListener(`keydown`, this._onEscKeyDown);
+    if (this._taskEdit && this._container.getElement().contains(this._taskEdit.getElement())) {
+      this._replaceEditWithView();
+    }
   }
 
   _replaceEditWithView() {
@@ -42,37 +55,37 @@ class TaskController {
   }
 
   _updateProperty(prop, cb) {
-    let entry = Object.assign({}, this._data);
+    let entry = Object.assign({}, this._task);
     entry[prop] = cb();
-    if (this._onDataChange(entry, this._data)) {
-      this._data = entry;
+    if (this._onDataChange(entry, this._task)) {
+      this._task = entry;
       entry = null;
     }
   }
 
   _subscribeOnViewEvents() {
     this._taskView.getElement()
-    .querySelector(`.card__btn--edit`)
-    .addEventListener(`click`, (e) => {
-      e.preventDefault();
-      this._taskEdit = new TaskEdit(this._data);
-      this._subscribeOnEditEvents();
-      this._onChangeView();
-      this._container.getElement().replaceChild(this._taskEdit.getElement(), this._taskView.getElement());
-      document.addEventListener(`keydown`, this._onEscKeyDown);
-    });
+      .querySelector(`.card__btn--edit`)
+      .addEventListener(`click`, (e) => {
+        e.preventDefault();
+        this._taskEdit = new TaskEdit(this._task);
+        this._subscribeOnEditEvents();
+        this._onChangeView();
+        this._container.getElement().replaceChild(this._taskEdit.getElement(), this._taskView.getElement());
+        document.addEventListener(`keydown`, this._onEscKeyDown);
+      });
 
     this._taskView.getElement()
-    .querySelector(`.card__btn--archive`)
-    .addEventListener(`click`, (e) => {
-      this._updateProperty(`isArchive`, this._onButtonClick.bind(null, e));
-    });
+      .querySelector(`.card__btn--archive`)
+      .addEventListener(`click`, (e) => {
+        this._updateProperty(`isArchive`, this._onButtonClick.bind(null, e));
+      });
 
     this._taskView.getElement()
-    .querySelector(`.card__btn--favorites`)
-    .addEventListener(`click`, (e) => {
-      this._updateProperty(`isFavorite`, this._onButtonClick.bind(null, e));
-    });
+      .querySelector(`.card__btn--favorites`)
+      .addEventListener(`click`, (e) => {
+        this._updateProperty(`isFavorite`, this._onButtonClick.bind(null, e));
+      });
   }
 
   _subscribeOnEditEvents() {
@@ -81,19 +94,19 @@ class TaskController {
       return;
     }
 
-    let isArchive = this._data.isArchive;
+    let isArchive = this._task.isArchive;
     this._taskEdit.getElement()
-    .querySelector(`.card__btn--archive`)
-    .addEventListener(`click`, (e) => {
-      isArchive = this._onButtonClick(e);
-    });
+      .querySelector(`.card__btn--archive`)
+      .addEventListener(`click`, (e) => {
+        isArchive = this._onButtonClick(e);
+      });
 
-    let isFavorite = this._data.isFavorite;
+    let isFavorite = this._task.isFavorite;
     this._taskEdit.getElement()
-    .querySelector(`.card__btn--favorites`)
-    .addEventListener(`click`, (e) => {
-      isFavorite = this._onButtonClick(e);
-    });
+      .querySelector(`.card__btn--favorites`)
+      .addEventListener(`click`, (e) => {
+        isFavorite = this._onButtonClick(e);
+      });
 
     const taskEditForm = this._taskEdit.getElement().querySelector(`.card__form`);
     taskEditForm.addEventListener(`submit`, (e) => {
@@ -121,27 +134,28 @@ class TaskController {
         isFavorite
       };
 
-      if (this._onDataChange(entry, this._data)) {
-        this._data = entry;
-        this._taskView = new Task(this._data);
+      if (this._onDataChange(entry, this._task)) {
+        this._task = entry;
+        this._taskView = new Task(this._task);
         this._subscribeOnViewEvents();
         this.setDefaultView();
       }
     });
 
-  }
+    this._taskEdit.getElement()
+      .querySelector(`.card__delete`)
+      .addEventListener(`click`, (e) => {
+        e.preventDefault();
+        this._onDataChange(null, this._task);
+        unrender(this._taskView.getElement());
+        this._taskView.removeElement();
+        this._taskView = null;
+        this._taskEdit.destroy();
+        unrender(this._taskEdit.getElement());
+        this._taskEdit.removeElement();
+        this._taskEdit = null;
 
-  setDefaultView() {
-    document.removeEventListener(`keydown`, this._onEscKeyDown);
-    if (this._taskEdit && this._container.getElement().contains(this._taskEdit.getElement())) {
-      this._replaceEditWithView();
-    }
-  }
-
-  create() {
-    this._subscribeOnViewEvents();
-
-    render(this._container.getElement(), this._taskView.getElement(), Position.BEFOREEND);
+      });
   }
 
 }

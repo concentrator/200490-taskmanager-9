@@ -16,7 +16,7 @@ const TASKS_TO_LOAD = 8;
 class BoardController {
   constructor(container, tasks) {
     this._container = container;
-    this._tasks = tasks.slice().sort((a, b) => a.createdDate - b.createdDate);
+    this._tasks = tasks.slice().sort((a, b) => b.id - a.id);
     this._tasksCount = TASKS_TO_LOAD;
     this._board = new Board();
     this._taskList = new TaskList();
@@ -39,23 +39,11 @@ class BoardController {
 
     } else {
 
+      render(this._board.getElement(), this._button.getElement(), Position.BEFOREEND);
+      this._button.getElement().addEventListener(`click`, (e) => this._onMoreButtonClick(e));
+
       this._renderSort();
       this._renderTaskList();
-
-      render(this._board.getElement(), this._button.getElement(), Position.BEFOREEND);
-
-      this._button.getElement().addEventListener(`click`, (e) => {
-        e.preventDefault();
-        this._tasksCount = this._taskList.getElement().childElementCount;
-        const tasksLeft = this._tasks.length - this._tasksCount;
-
-        this._renderTaskList(this._tasks, this._tasksCount, TASKS_TO_LOAD);
-        this._tasksCount += TASKS_TO_LOAD;
-
-        if (tasksLeft < TASKS_TO_LOAD) {
-          unrender(this._button.getElement());
-        }
-      });
     }
   }
 
@@ -72,6 +60,19 @@ class BoardController {
     render(this._board.getElement(), this._sort.getElement(), Position.AFTERBEGIN);
   }
 
+  _onMoreButtonClick(e) {
+    e.preventDefault();
+    this._tasksCount = this._taskList.getElement().childElementCount;
+    const tasksLeft = this._tasks.length - this._tasksCount;
+
+    this._renderTaskList(this._tasks, this._tasksCount, TASKS_TO_LOAD);
+    this._tasksCount += TASKS_TO_LOAD;
+
+    if (tasksLeft < TASKS_TO_LOAD) {
+      unrender(this._button.getElement());
+    }
+  }
+
   _onSortLinkClick(e) {
 
     e.preventDefault();
@@ -83,17 +84,17 @@ class BoardController {
 
     switch (e.target.dataset.sortType) {
       case `date-up`:
-        const sortedByDateUpTasks = this._tasks.sort((a, b) => a.dueDate - b.dueDate);
+        const sortedByDateUpTasks = this._tasks.sort((a, b) => Date.parse(a.dueDate) - Date.parse(b.dueDate));
         this._renderTaskList(sortedByDateUpTasks, 0, this._tasksCount);
         break;
 
       case `date-down`:
-        const sortedByDateDownTasks = this._tasks.sort((a, b) => b.dueDate - a.dueDate);
+        const sortedByDateDownTasks = this._tasks.sort((a, b) => Date.parse(b.dueDate) - Date.parse(a.dueDate));
         this._renderTaskList(sortedByDateDownTasks, 0, this._tasksCount);
         break;
 
       case `default`:
-        const sortedByDefaultTasks = this._tasks.sort((a, b) => a.createdDate - b.createdDate);
+        const sortedByDefaultTasks = this._tasks.sort((a, b) => b.id - a.id);
         this._renderTaskList(sortedByDefaultTasks, 0, this._tasksCount);
         break;
     }
@@ -114,7 +115,15 @@ class BoardController {
   }
 
   _onDataChange(newData, oldData) {
-    this._tasks[this._tasks.findIndex((it) => it === oldData)] = newData;
+    const index = this._tasks.indexOf(oldData);
+    // console.log(index)
+    if (newData === null) {
+      // console.log(this._tasks)
+      this._tasks = [...this._tasks.slice(0, index), ...this._tasks.slice(index + 1)];
+      // console.log(this._tasks)
+    } else {
+      this._tasks[index] = newData;
+    }
     return true;
   }
 

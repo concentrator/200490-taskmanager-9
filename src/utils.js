@@ -1,3 +1,5 @@
+const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+
 export const Position = {
   AFTERBEGIN: `afterbegin`,
   BEFOREEND: `beforeend`
@@ -24,6 +26,13 @@ export const unrender = (element) => {
   if (element) {
     element.remove();
   }
+};
+
+export const getDateInMsFromDateTime = (date) => {
+  if (typeof date !== `number`) {
+    date = Date.parse(date);
+  }
+  return Math.floor(date / ONE_DAY_MS) * ONE_DAY_MS;
 };
 
 export const getFormattedDate = (date) => {

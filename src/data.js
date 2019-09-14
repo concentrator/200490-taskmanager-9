@@ -1,3 +1,5 @@
+const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+
 const MenuItems = [
   {
     id: `new-task`,
@@ -70,8 +72,7 @@ const getTask = () => ({
     `Сделать домашку`,
     `Пройти интенсив на соточку`,
   ][Math.floor(Math.random() * 3)],
-  dueDate: Date.now() + 1 + Math.floor(Math.random() * 7) * 24 * 60 * 60 * 1000,
-  // dueDate: new Date(),
+  dueDate: new Date(Date.now() - ONE_DAY_MS + Math.floor(Math.random() * 7) * ONE_DAY_MS).toISOString(),
   repeatingDays: {
     'mo': false,
     'tu': false,
@@ -105,13 +106,16 @@ const getTaskList = (count) => {
   let i = 0;
   return Array.from(new Array(count), () => {
     const task = getTask();
-    task.createdDate = Date.now() + i++;
+    // task.createdDate = Date.now() + i++;
+    task.id = i++;
     return task;
   });
 };
 
 
 const taskList = getTaskList(33);
+
+// console.log(taskList)
 
 const data = {
   menu: MenuItems,
