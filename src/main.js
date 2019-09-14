@@ -4,21 +4,12 @@ import {Position} from './utils';
 import Menu from './components/menu';
 import Search from './components/search';
 import Filter from './components/filter';
+import Statistic from './components/statistic';
 
 import BoardController from './controllers/board';
 
 import data from './data';
 
-
-const renderMenu = (container, menuItems) => {
-  const menu = new Menu(menuItems);
-  render(container, menu.getElement(), Position.BEFOREEND);
-};
-
-const renderSearch = (container, searchItem) => {
-  const search = new Search(searchItem);
-  render(container, search.getElement(), Position.BEFOREEND);
-};
 
 const renderFilter = (container, filterItems, taskList) => {
 
@@ -48,16 +39,42 @@ const renderFilter = (container, filterItems, taskList) => {
   render(container, filter.getElement(), Position.BEFOREEND);
 };
 
-
 const siteMain = document.querySelector(`.main`);
 const siteControl = siteMain.querySelector(`.main__control`);
 
 
-renderMenu(siteControl, data.menu);
-renderSearch(siteMain, data.search);
+const mainMenu = new Menu(data.menu);
+const search = new Search(data.search);
+const statistic = new Statistic();
+
+
+render(siteControl, mainMenu.getElement(), Position.BEFOREEND);
+render(siteMain, search.getElement(), Position.BEFOREEND);
 renderFilter(siteMain, data.filter, data.taskList);
+render(siteMain, statistic.getElement(), Position.BEFOREEND);
 
 
-const board = new BoardController(siteMain, data.taskList);
+const boardController = new BoardController(siteMain, data.taskList);
 
-board.init();
+boardController.init();
+
+mainMenu.getElement().addEventListener(`change`, (e) => {
+  e.preventDefault();
+
+  if (e.target.tagName !== `INPUT`) {
+    return;
+  }
+
+  switch (e.target.id) {
+    case `control__task`:
+      boardController.show();
+      statistic.getElement().classList.add(`visually-hidden`);
+      break;
+
+    case `control__statistic`:
+      boardController.hide();
+      statistic.getElement().classList.remove(`visually-hidden`);
+      break;
+  }
+
+});

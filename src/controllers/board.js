@@ -59,6 +59,14 @@ class BoardController {
     }
   }
 
+  show() {
+    this._board.getElement().classList.remove(`visually-hidden`);
+  }
+
+  hide() {
+    this._board.getElement().classList.add(`visually-hidden`);
+  }
+
   _renderSort() {
     this._sort.getElement().addEventListener(`click`, (e) => this._onSortLinkClick(e));
     render(this._board.getElement(), this._sort.getElement(), Position.AFTERBEGIN);
