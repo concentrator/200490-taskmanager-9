@@ -107,6 +107,7 @@ const getTaskList = (count) => {
   return Array.from(new Array(count), () => {
     const task = getTask();
     // task.createdDate = Date.now() + i++;
+    task.dueDate = Date.parse(task.dueDate);
     task.id = i++;
     return task;
   });

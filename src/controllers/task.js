@@ -10,7 +10,7 @@ class TaskController {
     this._container = container;
     this._task = task;
     this._taskView = new Task(task);
-    this._taskEdit = null;
+    this._taskEdit = new TaskEdit(task);
     this._onChangeView = onChangeView;
     this._onDataChange = onDataChange;
     this._onEscKeyDown = this._onEscKeyDown.bind(this);
@@ -19,27 +19,53 @@ class TaskController {
 
   create() {
     this._subscribeOnViewEvents();
+    this._subscribeOnEditEvents();
     render(this._container.getElement(), this._taskView.getElement(), Position.BEFOREEND);
   }
 
   setDefaultView() {
-    document.removeEventListener(`keydown`, this._onEscKeyDown);
     if (this._taskEdit && this._container.getElement().contains(this._taskEdit.getElement())) {
       this._replaceEditWithView();
     }
   }
 
+  _createTaskView() {
+    this._taskView = new Task(this._task);
+    this._subscribeOnViewEvents();
+  }
+
+  _removeTaskView() {
+    this._taskView.removeElement();
+    this._taskView = null;
+  }
+
+  _createTaskEdit() {
+    this._taskEdit = new TaskEdit(this._task);
+    this._subscribeOnEditEvents();
+  }
+
+  _removeTaskEdit() {
+    this._taskEdit.destroy();
+    this._taskEdit.removeElement();
+    this._taskEdit = null;
+  }
+
   _replaceEditWithView() {
     this._container.getElement().replaceChild(this._taskView.getElement(), this._taskEdit.getElement());
-    this._taskEdit.destroy();
-    this._taskEdit = null;
+    document.removeEventListener(`keydown`, this._onEscKeyDown);
+    this._removeTaskEdit();
+    this._createTaskEdit();
+  }
+
+  _replaceViewWithEdit() {
+    this._container.getElement().replaceChild(this._taskEdit.getElement(), this._taskView.getElement());
+    document.addEventListener(`keydown`, this._onEscKeyDown);
   }
 
   _onEscKeyDown(evt) {
     if (evt.key === `Escape` || evt.key === `Esc`) {
       if (evt.target !== this._taskEdit.getElement().querySelector(`.card__text`)) {
         this._replaceEditWithView();
-        document.removeEventListener(`keydown`, this._onEscKeyDown);
       }
     }
   }
@@ -57,10 +83,21 @@ class TaskController {
   _updateProperty(prop, cb) {
     let entry = Object.assign({}, this._task);
     entry[prop] = cb();
-    if (this._onDataChange(entry, this._task)) {
-      this._task = entry;
-      entry = null;
-    }
+    this._onDataChange(entry, this._task, false);
+    this._task = entry;
+
+    let oldTaskView = this._taskView.getElement();
+
+    this._removeTaskView();
+    this._createTaskView();
+
+    this._container.getElement().replaceChild(this._taskView.getElement(), oldTaskView);
+    oldTaskView = null;
+
+    this._removeTaskEdit();
+    this._createTaskEdit();
+
+    entry = null;
   }
 
   _subscribeOnViewEvents() {
@@ -68,11 +105,8 @@ class TaskController {
       .querySelector(`.card__btn--edit`)
       .addEventListener(`click`, (e) => {
         e.preventDefault();
-        this._taskEdit = new TaskEdit(this._task);
-        this._subscribeOnEditEvents();
         this._onChangeView();
-        this._container.getElement().replaceChild(this._taskEdit.getElement(), this._taskView.getElement());
-        document.addEventListener(`keydown`, this._onEscKeyDown);
+        this._replaceViewWithEdit();
       });
 
     this._taskView.getElement()
@@ -134,12 +168,17 @@ class TaskController {
         isFavorite
       };
 
-      if (this._onDataChange(entry, this._task)) {
-        this._task = entry;
-        this._taskView = new Task(this._task);
-        this._subscribeOnViewEvents();
-        this.setDefaultView();
-      }
+      this._onDataChange(entry, this._task);
+
+      document.removeEventListener(`keydown`, this._onEscKeyDown);
+      // this._task = entry;
+      // this._removeTaskView();
+      // this._createTaskView();
+
+      // this.setDefaultView();
+
+      // this._removeTaskEdit();
+      // this._createTaskEdit();
     });
 
     this._taskEdit.getElement()

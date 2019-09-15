@@ -84,12 +84,12 @@ class BoardController {
 
     switch (e.target.dataset.sortType) {
       case `date-up`:
-        const sortedByDateUpTasks = this._tasks.sort((a, b) => Date.parse(a.dueDate) - Date.parse(b.dueDate));
+        const sortedByDateUpTasks = this._tasks.sort((a, b) => a.dueDate - b.dueDate);
         this._renderTaskList(sortedByDateUpTasks, 0, this._tasksCount);
         break;
 
       case `date-down`:
-        const sortedByDateDownTasks = this._tasks.sort((a, b) => Date.parse(b.dueDate) - Date.parse(a.dueDate));
+        const sortedByDateDownTasks = this._tasks.sort((a, b) => b.dueDate - a.dueDate);
         this._renderTaskList(sortedByDateDownTasks, 0, this._tasksCount);
         break;
 
@@ -114,17 +114,17 @@ class BoardController {
     this._subscriptions.forEach((it) => it());
   }
 
-  _onDataChange(newData, oldData) {
+  _onDataChange(newData, oldData, renderList = true) {
     const index = this._tasks.indexOf(oldData);
-    // console.log(index)
     if (newData === null) {
-      // console.log(this._tasks)
       this._tasks = [...this._tasks.slice(0, index), ...this._tasks.slice(index + 1)];
-      // console.log(this._tasks)
     } else {
       this._tasks[index] = newData;
     }
-    return true;
+    if (renderList) {
+      this._taskList.getElement().innerHTML = ``;
+      this._renderTaskList();
+    }
   }
 
   _renderTaskList(tasks = this._tasks, startIndex = 0, count = this._tasksCount) {

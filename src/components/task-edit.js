@@ -63,6 +63,7 @@ class TaskEdit extends AbstractComponent {
   _initFlatpickr() {
     this._calendar =
     flatpickr(this.getElement().querySelector(`.card__date`), {
+      appendTo: this.getElement(),
       altFormat: `j F`,
       altInput: true,
       allowInput: true,
@@ -131,9 +132,8 @@ class TaskEdit extends AbstractComponent {
   }
 
   _subscribeOnEvents() {
-    if (this._dueDate) {
-      this._initFlatpickr();
-    }
+    this._initFlatpickr();
+
     this.getElement().querySelector(`.card__date-deadline-toggle`)
       .addEventListener(`click`, (e) => this._onDateButtonClick(e));
 
