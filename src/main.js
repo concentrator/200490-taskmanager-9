@@ -10,6 +10,11 @@ import BoardController from './controllers/board';
 
 import data from './data';
 
+const ID = {
+  TASK: `control__task`,
+  STATISTIC: `control__statistic`,
+  NEW_TASK: `control__new-task`
+};
 
 const renderFilter = (container, filterItems, taskList) => {
 
@@ -66,14 +71,20 @@ mainMenu.getElement().addEventListener(`change`, (e) => {
   }
 
   switch (e.target.id) {
-    case `control__task`:
+    case ID.TASK:
       boardController.show();
       statistic.getElement().classList.add(`visually-hidden`);
       break;
 
-    case `control__statistic`:
+    case ID.STATISTIC:
       boardController.hide();
       statistic.getElement().classList.remove(`visually-hidden`);
+      break;
+
+    case ID.NEW_TASK:
+      boardController.createTask();
+      // Вернем выделенный элемент
+      mainMenu.getElement().querySelector(`#${ID.TASK}`).checked = true;
       break;
   }
 

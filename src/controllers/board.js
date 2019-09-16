@@ -1,6 +1,4 @@
-import {render} from '../utils';
-import {unrender} from '../utils';
-import {Position} from '../utils';
+import {render, unrender, Position} from '../utils';
 
 import Board from '../components/board';
 import Sort from '../components/sort';
@@ -10,6 +8,10 @@ import Button from '../components/button';
 
 import TaskController from './task';
 
+const Mode = {
+  ADDING: `adding`,
+  DEFAULT: `default`,
+};
 
 const TASKS_TO_LOAD = 8;
 
@@ -55,6 +57,34 @@ class BoardController {
     this._board.getElement().classList.add(`visually-hidden`);
   }
 
+  createTask() {
+    if (this._creatingTask) {
+      return;
+    }
+
+    this._onChangeView();
+
+    const defaultTask = {
+      description: ``,
+      dueDate: Date.now(),
+      tags: new Set(),
+      color: ``,
+      repeatingDays: {},
+      isFavorite: false,
+      isArchive: false,
+    };
+
+    this._creatingTask =
+      new TaskController(this._taskList, defaultTask, Mode.ADDING, this._onDataChange, this._onChangeView);
+
+    this._subscriptions.unshift(this._creatingTask.setDefaultView.bind(this._creatingTask));
+  }
+
+  _removeCreatingTask() {
+    this._creatingTask.removeCreatingTask();
+    this._creatingTask = null;
+  }
+
   _renderSort() {
     this._sort.getElement().addEventListener(`click`, (e) => this._onSortLinkClick(e));
     render(this._board.getElement(), this._sort.getElement(), Position.AFTERBEGIN);
@@ -64,6 +94,8 @@ class BoardController {
     e.preventDefault();
     this._tasksCount = this._taskList.getElement().childElementCount;
     const tasksLeft = this._tasks.length - this._tasksCount;
+
+    this._onChangeView();
 
     this._renderTaskList(this._tasks, this._tasksCount, TASKS_TO_LOAD);
     this._tasksCount += TASKS_TO_LOAD;
@@ -79,7 +111,8 @@ class BoardController {
     if (e.target.nodeName !== `A`) {
       return;
     }
-
+    this._onChangeView();
+    this._subscriptions = [];
     this._taskList.getElement().innerHTML = ``;
 
     switch (e.target.dataset.sortType) {
@@ -105,12 +138,15 @@ class BoardController {
   }
 
   _renderTask(task) {
-    const taskController = new TaskController(this._taskList, task, this._onDataChange, this._onChangeView);
-
+    const taskController = new TaskController(this._taskList, task, Mode.DEFAULT, this._onDataChange, this._onChangeView);
     this._subscriptions.push(taskController.setDefaultView.bind(taskController));
   }
 
   _onChangeView() {
+    if (this._creatingTask) {
+      this._subscriptions.splice(0, 1);
+      this._removeCreatingTask();
+    }
     this._subscriptions.forEach((it) => it());
   }
 
@@ -118,10 +154,14 @@ class BoardController {
     const index = this._tasks.indexOf(oldData);
     if (newData === null) {
       this._tasks = [...this._tasks.slice(0, index), ...this._tasks.slice(index + 1)];
+    } else if (oldData === null) {
+      this._removeCreatingTask();
+      this._tasks = [newData, ...this._tasks];
     } else {
       this._tasks[index] = newData;
     }
     if (renderList) {
+      this._subscriptions = [];
       this._taskList.getElement().innerHTML = ``;
       this._renderTaskList();
     }

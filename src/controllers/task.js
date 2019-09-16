@@ -5,12 +5,19 @@ import {Position} from '../utils';
 import Task from '../components/task';
 import TaskEdit from '../components/task-edit';
 
+const Mode = {
+  ADDING: `adding`,
+  DEFAULT: `default`,
+};
+
 class TaskController {
-  constructor(container, task, onDataChange, onChangeView) {
+  constructor(container, task, mode, onDataChange, onChangeView) {
     this._container = container;
     this._task = task;
+    this._mode = mode;
     this._taskView = new Task(task);
     this._taskEdit = new TaskEdit(task);
+    this._currentView = this._taskView;
     this._onChangeView = onChangeView;
     this._onDataChange = onDataChange;
     this._onEscKeyDown = this._onEscKeyDown.bind(this);
@@ -18,14 +25,32 @@ class TaskController {
   }
 
   create() {
+
+    let renderPosition = Position.BEFOREEND;
+
+    if (this._mode === Mode.ADDING) {
+      renderPosition = Position.AFTERBEGIN;
+      this._currentView = this._taskEdit;
+      this._taskEdit.initFlatpickr();
+      document.addEventListener(`keydown`, this._onEscKeyDown);
+    }
+
     this._subscribeOnViewEvents();
     this._subscribeOnEditEvents();
-    render(this._container.getElement(), this._taskView.getElement(), Position.BEFOREEND);
+    render(this._container.getElement(), this._currentView.getElement(), renderPosition);
   }
 
   setDefaultView() {
-    if (this._taskEdit && this._container.getElement().contains(this._taskEdit.getElement())) {
+    if (this._container.getElement().contains(this._taskEdit.getElement())) {
       this._replaceEditWithView();
+    }
+  }
+
+  removeCreatingTask() {
+    if (this._mode === Mode.ADDING) {
+      unrender(this._currentView.getElement());
+      this._currentView.removeElement();
+      document.removeEventListener(`keydown`, this._onEscKeyDown);
     }
   }
 
@@ -45,7 +70,7 @@ class TaskController {
   }
 
   _removeTaskEdit() {
-    this._taskEdit.destroy();
+    this._taskEdit.destroyFlatpickr();
     this._taskEdit.removeElement();
     this._taskEdit = null;
   }
@@ -65,7 +90,16 @@ class TaskController {
   _onEscKeyDown(evt) {
     if (evt.key === `Escape` || evt.key === `Esc`) {
       if (evt.target !== this._taskEdit.getElement().querySelector(`.card__text`)) {
-        this._replaceEditWithView();
+
+        switch (this._mode) {
+          case Mode.DEFAULT:
+            this._replaceEditWithView();
+            break;
+
+          case Mode.ADDING:
+            this._onChangeView();
+            break;
+        }
       }
     }
   }
@@ -107,6 +141,7 @@ class TaskController {
         e.preventDefault();
         this._onChangeView();
         this._replaceViewWithEdit();
+        this._taskEdit.initFlatpickr();
       });
 
     this._taskView.getElement()
@@ -123,7 +158,6 @@ class TaskController {
   }
 
   _subscribeOnEditEvents() {
-
     if (!this._taskEdit) {
       return;
     }
@@ -167,33 +201,25 @@ class TaskController {
         isArchive,
         isFavorite
       };
+      this.setDefaultView();
 
-      this._onDataChange(entry, this._task);
-
-      document.removeEventListener(`keydown`, this._onEscKeyDown);
-      // this._task = entry;
-      // this._removeTaskView();
-      // this._createTaskView();
-
-      // this.setDefaultView();
-
-      // this._removeTaskEdit();
-      // this._createTaskEdit();
+      this._onDataChange(entry, this._mode === Mode.DEFAULT ? this._task : null);
     });
 
     this._taskEdit.getElement()
       .querySelector(`.card__delete`)
       .addEventListener(`click`, (e) => {
         e.preventDefault();
-        this._onDataChange(null, this._task);
-        unrender(this._taskView.getElement());
-        this._taskView.removeElement();
-        this._taskView = null;
-        this._taskEdit.destroy();
-        unrender(this._taskEdit.getElement());
-        this._taskEdit.removeElement();
-        this._taskEdit = null;
-
+        if (this._mode === Mode.DEFAULT) {
+          this._onDataChange(null, this._task);
+          unrender(this._taskView.getElement());
+          this._removeTaskView();
+          unrender(this._taskEdit.getElement());
+          this._removeTaskEdit();
+          document.removeEventListener(`keydown`, this._onEscKeyDown);
+        } else if (this._mode === Mode.ADDING) {
+          this._onChangeView();
+        }
       });
   }
 
