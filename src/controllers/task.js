@@ -5,7 +5,7 @@ import {Position} from '../utils';
 import Task from '../components/task';
 import TaskEdit from '../components/task-edit';
 
-const Mode = {
+export const Mode = {
   ADDING: `adding`,
   DEFAULT: `default`,
 };
@@ -17,6 +17,7 @@ class TaskController {
     this._mode = mode;
     this._taskView = new Task(task);
     this._taskEdit = new TaskEdit(task);
+    // this._taskEdit = null;
     this._currentView = this._taskView;
     this._onChangeView = onChangeView;
     this._onDataChange = onDataChange;
@@ -121,7 +122,6 @@ class TaskController {
     this._task = entry;
 
     let oldTaskView = this._taskView.getElement();
-
     this._removeTaskView();
     this._createTaskView();
 

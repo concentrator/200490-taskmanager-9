@@ -59,9 +59,9 @@ renderFilter(siteMain, data.filter, data.taskList);
 render(siteMain, statistic.getElement(), Position.BEFOREEND);
 
 
-const boardController = new BoardController(siteMain, data.taskList);
+const boardController = new BoardController(siteMain);
 
-boardController.init();
+boardController.show(data.taskList);
 
 mainMenu.getElement().addEventListener(`change`, (e) => {
   e.preventDefault();
@@ -72,7 +72,7 @@ mainMenu.getElement().addEventListener(`change`, (e) => {
 
   switch (e.target.id) {
     case ID.TASK:
-      boardController.show();
+      boardController.show(data.taskList);
       statistic.getElement().classList.add(`visually-hidden`);
       break;
 

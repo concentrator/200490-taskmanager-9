@@ -6,50 +6,40 @@ import TaskList from '../components/task-list';
 import Message from '../components/message';
 import Button from '../components/button';
 
-import TaskController from './task';
-
-const Mode = {
-  ADDING: `adding`,
-  DEFAULT: `default`,
-};
+import TaskListController from './task-list';
 
 const TASKS_TO_LOAD = 8;
 
+const SortMode = {
+  DEFAULT: `default`,
+  DATE_UP: `date-up`,
+  DATE_DOWN: `date-down`
+};
+
 class BoardController {
-  constructor(container, tasks) {
+  constructor(container) {
     this._container = container;
-    this._tasks = tasks.slice().sort((a, b) => b.id - a.id);
+    this._tasks = [];
     this._tasksCount = TASKS_TO_LOAD;
     this._board = new Board();
     this._taskList = new TaskList();
     this._sort = new Sort();
     this._button = new Button();
-    this._subscriptions = [];
-    this._onChangeView = this._onChangeView.bind(this);
+    this._sortMode = SortMode.DEFAULT;
     this._onDataChange = this._onDataChange.bind(this);
+    this._taskListController = new TaskListController(this._taskList, this._onDataChange);
+    this._init();
   }
 
-  init() {
+  _init() {
     render(this._container, this._board.getElement(), Position.BEFOREEND);
-    render(this._board.getElement(), this._taskList.getElement(), Position.AFTERBEGIN);
-
-    if (this._taskList.length === 0 || this._isAllArchive()) {
-
-      const message = new Message(`no-tasks`);
-      render(this._board.getElement(), message.getElement(), Position.AFTERBEGIN);
-      unrender(this._taskList.getElement());
-
-    } else {
-
-      render(this._board.getElement(), this._button.getElement(), Position.BEFOREEND);
-      this._button.getElement().addEventListener(`click`, (e) => this._onMoreButtonClick(e));
-
-      this._renderSort();
-      this._renderTaskList();
-    }
+    this._renderSort();
   }
 
-  show() {
+  show(tasks) {
+    if (tasks !== this._tasks) {
+      this._setTasks(tasks);
+    }
     this._board.getElement().classList.remove(`visually-hidden`);
   }
 
@@ -58,122 +48,128 @@ class BoardController {
   }
 
   createTask() {
-    if (this._creatingTask) {
+    if (!this._board.getElement().contains(this._taskList.getElement())) {
+      render(this._board.getElement(), this._taskList.getElement(), Position.BEFOREEND);
+      this._removeMessage();
+    }
+    this._taskListController.createTask();
+  }
+
+  _renderBoard() {
+    render(this._board.getElement(), this._taskList.getElement(), Position.BEFOREEND);
+    unrender(this._button.getElement());
+    this._button.removeElement();
+
+    if (this._tasks.length === 0 || this._isAllArchive()) {
+      unrender(this._taskList.getElement());
+      this._taskList.removeElement();
+      unrender(this._sort.getElement());
+      this._sort.removeElement();
+      this._message = new Message(`no-tasks`);
+      render(this._board.getElement(), this._message.getElement(), Position.AFTERBEGIN);
+
       return;
     }
 
-    this._onChangeView();
+    this._removeMessage();
 
-    const defaultTask = {
-      description: ``,
-      dueDate: Date.now(),
-      tags: new Set(),
-      color: ``,
-      repeatingDays: {},
-      isFavorite: false,
-      isArchive: false,
-    };
+    if (this._tasksCount < this._tasks.length) {
+      render(this._board.getElement(), this._button.getElement(), Position.BEFOREEND);
+    }
 
-    this._creatingTask =
-      new TaskController(this._taskList, defaultTask, Mode.ADDING, this._onDataChange, this._onChangeView);
+    let tasks = this._tasks;
 
-    this._subscriptions.unshift(this._creatingTask.setDefaultView.bind(this._creatingTask));
+    if (this._sortMode !== SortMode.DEFAULT) {
+      if (this._sortMode === SortMode.DATE_UP) {
+        this._setSortedByDateUpTasks();
+      } else if (this._sortMode === SortMode.DATE_DOWN) {
+        this._setSortedByDateDownTasks();
+      }
+      tasks = this._sortedTasks;
+    }
+
+    this._taskListController.setTasks(tasks.slice(0, this._tasksCount));
+    this._button.getElement().addEventListener(`click`, (e) => this._onMoreButtonClick(e));
   }
 
-  _removeCreatingTask() {
-    this._creatingTask.removeCreatingTask();
-    this._creatingTask = null;
+  _setTasks(tasks) {
+    this._tasks = tasks.slice();
+    this._tasksCount = TASKS_TO_LOAD;
+    this._renderBoard();
+  }
+
+  _removeMessage() {
+    if (this._message) {
+      unrender(this._message.getElement());
+      this._message.removeElement();
+      this._message = null;
+    }
   }
 
   _renderSort() {
-    this._sort.getElement().addEventListener(`click`, (e) => this._onSortLinkClick(e));
     render(this._board.getElement(), this._sort.getElement(), Position.AFTERBEGIN);
+    this._sort.getElement().addEventListener(`click`, (e) => this._onSortLinkClick(e));
   }
 
   _onMoreButtonClick(e) {
     e.preventDefault();
-    this._tasksCount = this._taskList.getElement().childElementCount;
-    const tasksLeft = this._tasks.length - this._tasksCount;
+    const tasks = this._sortMode === SortMode.DEFAULT ? this._tasks : this._sortedTasks;
 
-    this._onChangeView();
+    this._taskListController.addTasks(tasks.slice(this._tasksCount, this._tasksCount + TASKS_TO_LOAD));
 
-    this._renderTaskList(this._tasks, this._tasksCount, TASKS_TO_LOAD);
     this._tasksCount += TASKS_TO_LOAD;
 
-    if (tasksLeft < TASKS_TO_LOAD) {
+    if (this._tasksCount >= this._tasks.length) {
       unrender(this._button.getElement());
+      this._button.removeElement();
     }
+  }
+
+  _setSortedByDateUpTasks() {
+    this._sortedTasks = this._tasks.slice().sort((a, b) => a.dueDate - b.dueDate);
+  }
+
+  _setSortedByDateDownTasks() {
+    this._sortedTasks = this._tasks.slice().sort((a, b) => b.dueDate - a.dueDate);
   }
 
   _onSortLinkClick(e) {
 
     e.preventDefault();
-    if (e.target.nodeName !== `A`) {
+    if (e.target.nodeName !== `A` || this._sortMode === e.target.dataset.sortType) {
       return;
     }
-    this._onChangeView();
-    this._subscriptions = [];
-    this._taskList.getElement().innerHTML = ``;
 
-    switch (e.target.dataset.sortType) {
-      case `date-up`:
-        const sortedByDateUpTasks = this._tasks.sort((a, b) => a.dueDate - b.dueDate);
-        this._renderTaskList(sortedByDateUpTasks, 0, this._tasksCount);
+    this._sortMode = e.target.dataset.sortType;
+
+    switch (this._sortMode) {
+      case SortMode.DATE_UP:
+        this._setSortedByDateUpTasks();
+        this._taskListController.setTasks(this._sortedTasks.slice(0, this._tasksCount));
         break;
 
-      case `date-down`:
-        const sortedByDateDownTasks = this._tasks.sort((a, b) => b.dueDate - a.dueDate);
-        this._renderTaskList(sortedByDateDownTasks, 0, this._tasksCount);
+      case SortMode.DATE_DOWN:
+        this._setSortedByDateDownTasks();
+        this._taskListController.setTasks(this._sortedTasks.slice(0, this._tasksCount));
         break;
 
-      case `default`:
-        const sortedByDefaultTasks = this._tasks.sort((a, b) => b.id - a.id);
-        this._renderTaskList(sortedByDefaultTasks, 0, this._tasksCount);
+      case SortMode.DEFAULT:
+        this._taskListController.setTasks(this._tasks.slice(0, this._tasksCount));
         break;
     }
+
+
   }
 
   _isAllArchive() {
     return this._tasks.filter((task) => task.isArchive).length === this._tasks.length;
   }
 
-  _renderTask(task) {
-    const taskController = new TaskController(this._taskList, task, Mode.DEFAULT, this._onDataChange, this._onChangeView);
-    this._subscriptions.push(taskController.setDefaultView.bind(taskController));
-  }
+  _onDataChange(tasks) {
+    // Переписываем видимую часть тасков
+    this._tasks = [...tasks, ...this._tasks.slice(this._tasksCount)];
 
-  _onChangeView() {
-    if (this._creatingTask) {
-      this._subscriptions.splice(0, 1);
-      this._removeCreatingTask();
-    }
-    this._subscriptions.forEach((it) => it());
-  }
-
-  _onDataChange(newData, oldData, renderList = true) {
-    const index = this._tasks.indexOf(oldData);
-    if (newData === null) {
-      this._tasks = [...this._tasks.slice(0, index), ...this._tasks.slice(index + 1)];
-    } else if (oldData === null) {
-      this._removeCreatingTask();
-      this._tasks = [newData, ...this._tasks];
-    } else {
-      this._tasks[index] = newData;
-    }
-    if (renderList) {
-      this._subscriptions = [];
-      this._taskList.getElement().innerHTML = ``;
-      this._renderTaskList();
-    }
-  }
-
-  _renderTaskList(tasks = this._tasks, startIndex = 0, count = this._tasksCount) {
-    const endIndex = startIndex + count;
-    const tasksToRender = tasks.slice(startIndex, endIndex);
-
-    tasksToRender.forEach((task) => {
-      this._renderTask(task);
-    });
+    this._renderBoard();
   }
 }
 
