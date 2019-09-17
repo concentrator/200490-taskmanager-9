@@ -1,4 +1,5 @@
 import {getFormattedDate} from '../utils';
+import {getDateInMsFromDateTime} from '../utils';
 
 import AbstractComponent from './abstract-component';
 
@@ -17,7 +18,7 @@ class Task extends AbstractComponent {
 
   getTemplate() {
     return `
-    <article class="card card--${this._color} ${Object.values(this._repeatingDays).some((day) => day === true) ? `card--repeat` : ``}">
+    <article class="card card--${this._color} ${Object.values(this._repeatingDays).some((day) => day) ? `card--repeat` : ``} ${getDateInMsFromDateTime(this._dueDate) < getDateInMsFromDateTime(Date.now()) ? `card--deadline` : ``}">
       <div class="card__form">
         <div class="card__inner">
           <div class="card__control">

@@ -23,7 +23,7 @@ class TaskEdit extends AbstractComponent {
     this._calendar = null;
     this._tags = tags;
     this._tagElements = null;
-    this._color = color;
+    this._color = color ? color : `black`;
     this._repeatingDays = repeatingDays;
     this._isRepeating = this._isRepeating();
     this._isArchive = isArchive;
@@ -31,7 +31,18 @@ class TaskEdit extends AbstractComponent {
     this._subscribeOnEvents();
   }
 
-  destroy() {
+  initFlatpickr() {
+    this._calendar =
+    flatpickr(this.getElement().querySelector(`.card__date`), {
+      altFormat: `j F`,
+      altInput: true,
+      allowInput: true,
+      minDate: Math.min(this._dueDate, Date.now()),
+      defaultDate: this._dueDate ? this._dueDate : new Date(),
+    });
+  }
+
+  destroyFlatpickr() {
     if (this._calendar) {
       this._calendar.destroy();
     }
@@ -50,24 +61,14 @@ class TaskEdit extends AbstractComponent {
     if (dateElement.hidden) {
       dateElement.hidden = false;
       dateStatus.textContent = `Yes`;
-      this._initFlatpickr();
+      this.initFlatpickr();
 
     } else {
       dateElement.hidden = true;
       dateStatus.textContent = `No`;
       dateInput.value = ``;
-      this._calendar.destroy();
+      this.destroyFlatpickr();
     }
-  }
-
-  _initFlatpickr() {
-    this._calendar =
-    flatpickr(this.getElement().querySelector(`.card__date`), {
-      altFormat: `j F`,
-      altInput: true,
-      allowInput: true,
-      defaultDate: this._dueDate ? this._dueDate : Date.now(),
-    });
   }
 
   _onRepeatButtonClick(e) {
@@ -131,9 +132,6 @@ class TaskEdit extends AbstractComponent {
   }
 
   _subscribeOnEvents() {
-    if (this._dueDate) {
-      this._initFlatpickr();
-    }
     this.getElement().querySelector(`.card__date-deadline-toggle`)
       .addEventListener(`click`, (e) => this._onDateButtonClick(e));
 
