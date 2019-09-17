@@ -27,7 +27,7 @@ class BoardController {
     this._button = new Button();
     this._sortMode = SortMode.DEFAULT;
     this._onDataChange = this._onDataChange.bind(this);
-    this._taskListController = new TaskListController(this._taskList, this._onDataChange);
+    this._taskListController = new TaskListController(this._taskList.getElement(), this._onDataChange);
     this._init();
   }
 

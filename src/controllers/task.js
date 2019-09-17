@@ -38,11 +38,11 @@ class TaskController {
 
     this._subscribeOnViewEvents();
     this._subscribeOnEditEvents();
-    render(this._container.getElement(), this._currentView.getElement(), renderPosition);
+    render(this._container, this._currentView.getElement(), renderPosition);
   }
 
   setDefaultView() {
-    if (this._container.getElement().contains(this._taskEdit.getElement())) {
+    if (this._container.contains(this._taskEdit.getElement())) {
       this._replaceEditWithView();
     }
   }
@@ -77,14 +77,14 @@ class TaskController {
   }
 
   _replaceEditWithView() {
-    this._container.getElement().replaceChild(this._taskView.getElement(), this._taskEdit.getElement());
+    this._container.replaceChild(this._taskView.getElement(), this._taskEdit.getElement());
     document.removeEventListener(`keydown`, this._onEscKeyDown);
     this._removeTaskEdit();
     this._createTaskEdit();
   }
 
   _replaceViewWithEdit() {
-    this._container.getElement().replaceChild(this._taskEdit.getElement(), this._taskView.getElement());
+    this._container.replaceChild(this._taskEdit.getElement(), this._taskView.getElement());
     document.addEventListener(`keydown`, this._onEscKeyDown);
   }
 
@@ -125,7 +125,7 @@ class TaskController {
     this._removeTaskView();
     this._createTaskView();
 
-    this._container.getElement().replaceChild(this._taskView.getElement(), oldTaskView);
+    this._container.replaceChild(this._taskView.getElement(), oldTaskView);
     oldTaskView = null;
 
     this._removeTaskEdit();

@@ -7,6 +7,7 @@ import Filter from './components/filter';
 import Statistic from './components/statistic';
 
 import BoardController from './controllers/board';
+import SearchController from './controllers/search';
 
 import data from './data';
 
@@ -47,10 +48,14 @@ const renderFilter = (container, filterItems, taskList) => {
 const siteMain = document.querySelector(`.main`);
 const siteControl = siteMain.querySelector(`.main__control`);
 
+let taskMocks = data.taskList;
 
 const mainMenu = new Menu(data.menu);
 const search = new Search(data.search);
 const statistic = new Statistic();
+const onDataChange = (tasks) => {
+  taskMocks = tasks;
+};
 
 
 render(siteControl, mainMenu.getElement(), Position.BEFOREEND);
@@ -59,9 +64,17 @@ renderFilter(siteMain, data.filter, data.taskList);
 render(siteMain, statistic.getElement(), Position.BEFOREEND);
 
 
-const boardController = new BoardController(siteMain);
+const boardController = new BoardController(siteMain, onDataChange);
 
-boardController.show(data.taskList);
+const onSearchBackButtonClick = () => {
+  statistic.getElement().classList.add(`visually-hidden`);
+  searchController.hide();
+  boardController.show(taskMocks);
+};
+
+const searchController = new SearchController(siteMain, search, onSearchBackButtonClick);
+
+boardController.show(taskMocks);
 
 mainMenu.getElement().addEventListener(`change`, (e) => {
   e.preventDefault();
@@ -72,20 +85,32 @@ mainMenu.getElement().addEventListener(`change`, (e) => {
 
   switch (e.target.id) {
     case ID.TASK:
-      boardController.show(data.taskList);
+      boardController.show(taskMocks);
+      searchController.hide();
       statistic.getElement().classList.add(`visually-hidden`);
       break;
 
     case ID.STATISTIC:
       boardController.hide();
+      searchController.hide();
       statistic.getElement().classList.remove(`visually-hidden`);
       break;
 
     case ID.NEW_TASK:
+      searchController.hide();
+      statistic.getElement().classList.add(`visually-hidden`);
+      boardController.show(taskMocks);
       boardController.createTask();
+
       // Вернем выделенный элемент
       mainMenu.getElement().querySelector(`#${ID.TASK}`).checked = true;
       break;
   }
 
+});
+
+search.getElement().addEventListener(`click`, () => {
+  statistic.getElement().classList.add(`visually-hidden`);
+  boardController.hide();
+  searchController.show(taskMocks);
 });

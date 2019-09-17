@@ -17,7 +17,7 @@ class TaskListController {
   setTasks(tasks) {
     this._tasks = tasks;
     this._subscriptions = [];
-    this._container.getElement().innerHTML = ``;
+    this._container.innerHTML = ``;
     this._renderTaskList();
   }
 
